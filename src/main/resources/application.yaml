@@ -1,0 +1,26 @@
+logging:
+  level:
+    org.apache.kafka.clients.consumer.ConsumerConfig: WARN
+    org.apache.kafka.clients.producer.ProducerConfig: WARN
+    io.github.otaviof.ravine: DEBUG
+
+ravine:
+  startup:
+    timeoutMs: 60000
+    checkIntervalMs: 1500
+  kafka:
+    schemaRegistryUrl: http://schemaregistry.localtest.me:8681
+    brokers: kafka.localtest.me:9092
+  routes:
+    - name: example
+      route: /v1/group/app/action
+      subject:
+        name: person
+        version: 1
+      request:
+        topic: kafka_request_topic
+        valueSerde: io.confluent.kafka.streams.serdes.avro.GenericAvroSerializer
+      response:
+        topic: kafka_request_topic
+        # topic: kafka_response_topic
+

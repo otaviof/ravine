@@ -1,0 +1,45 @@
+---
+version: "2"
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.2.1-1
+    ports:
+      - 2181:2181
+    environment:
+      ZOOKEEPER_LOG4J_ROOT_LOGLEVEL: info
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  kafka:
+    image: confluentinc/cp-kafka:5.2.1-1
+    ports:
+      - 9092:9092
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      PORT: 9092
+      KAFKA_BROKER_ID: 0
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_HOST_NAME: kafka
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAKFA_OPTS: -Djavax.net.debug=all
+      KAFKA_LOG4J_ROOT_LOGLEVEL: info
+    depends_on:
+      - zookeeper
+
+  schemaregistry:
+    image: confluentinc/cp-schema-registry:5.2.1-1
+    ports:
+      - 8681:8681
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
+      SCHEMA_REGISTRY_HOST_NAME: schemaregistry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8681
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: "1"
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC: _schemas
+      SCHEMA_REGISTRY_DEBUG: "true"
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: info
+    depends_on:
+      - kafka
