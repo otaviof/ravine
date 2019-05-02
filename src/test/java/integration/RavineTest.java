@@ -20,7 +20,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
@@ -39,33 +38,9 @@ public class RavineTest {
     @Autowired
     Config config;
 
-    /**
-     * Waiting for Kafka, and when ready create request and response topics.
-     */
     @BeforeClass
-    public static void waitForKafka() {
-        var broker = "kafka.localtest.me:9092";
-
-        log.info("Waiting for Kafka broker at '{}'", broker);
-        await().atMost(60, TimeUnit.SECONDS).until(() -> Utils.isPortOpen(broker));
-
-        Utils.createKafkaTopics(broker, Arrays.asList("kafka_request_topic", "kafka_response_topic"));
-    }
-
-    /**
-     * Wait for Schema-Registry and when ready, register "person" subject.
-     *
-     * @throws IOException         on reading avro definition file;
-     * @throws RestClientException on registering schema;
-     */
-    @BeforeClass
-    public static void waitForSchemaRegistry() throws IOException, RestClientException {
-        var schemaRegistryUrl = "schemaregistry.localtest.me:8681";
-
-        log.info("Waiting for Schema-Registry at '{}'", schemaRegistryUrl);
-        await().atMost(60, TimeUnit.SECONDS).until(() -> Utils.isPortOpen(schemaRegistryUrl));
-
-        Utils.registerSubject(String.format("http://%s", schemaRegistryUrl), "person", "avro/person.avsc");
+    public static void prepare() throws IOException, RestClientException {
+        PrepareBackends.prepare();
     }
 
     @Test

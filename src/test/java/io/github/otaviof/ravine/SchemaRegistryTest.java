@@ -1,9 +1,14 @@
 package io.github.otaviof.ravine;
 
+import integration.PrepareBackends;
+import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.otaviof.ravine.config.SubjectConfig;
 import io.github.otaviof.ravine.confluent.SchemaRegistry;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -12,6 +17,11 @@ public class SchemaRegistryTest {
     private SubjectConfig subject;
 
     SchemaRegistry schemaRegistry = new SchemaRegistry("http://127.0.0.1:8681");
+
+    @BeforeClass
+    public static void prepare() throws IOException, RestClientException {
+        PrepareBackends.waitForSchemaRegistry();
+    }
 
     @Before
     public void setUp() {
