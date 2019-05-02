@@ -5,16 +5,20 @@ jdk:
 install: true
 services:
   - docker
+addons:
+  hosts:
+    - kafka
+    - zookeeper
+    - schemaregistry
 before_script:
   - docker-compose up -d
   - sleep 60
-  - docker-compose logs --tail 200 2>&1
   - ./gradlew assemble
 script:
   - ./gradlew --info test
   - ./gradlew --info integration
-after_success:
-  - true
+# after_success:
+#   - true
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
