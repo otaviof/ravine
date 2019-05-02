@@ -37,12 +37,6 @@ public class ApiController {
         var contentLength = req.getContentLength();
         var bos = new ByteArrayOutputStream(contentLength >= 0 ? contentLength : StreamUtils.BUFFER_SIZE);
 
-        log.debug("context-path: '{}', servlet-path: '{}', path-info: '{}', path-translated: '{}'",
-                req.getContextPath(),
-                req.getServletPath(),
-                req.getPathInfo(),
-                req.getPathTranslated());
-
         StreamUtils.copy(body, bos);
 
         log.info("Handling request for '{}' path", path);
