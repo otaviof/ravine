@@ -1,6 +1,6 @@
 package io.github.otaviof.ravine;
 
-import integration.PrepareBackends;
+import integration.PrepareBackend;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.otaviof.ravine.config.SubjectConfig;
 import io.github.otaviof.ravine.confluent.SchemaRegistry;
@@ -20,7 +20,7 @@ public class SchemaRegistryTest {
 
     @BeforeClass
     public static void prepare() throws IOException, RestClientException {
-        PrepareBackends.waitForSchemaRegistry();
+        PrepareBackend.waitForSchemaRegistry();
     }
 
     @Before

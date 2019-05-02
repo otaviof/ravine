@@ -40,7 +40,7 @@ public class RavineTest {
 
     @BeforeClass
     public static void prepare() throws IOException, RestClientException {
-        PrepareBackends.prepare();
+        PrepareBackend.prepare();
     }
 
     @Test

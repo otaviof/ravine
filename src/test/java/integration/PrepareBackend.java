@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import static org.awaitility.Awaitility.await;
 
 @Slf4j
-public class PrepareBackends {
+public class PrepareBackend {
     /**
      * Waiting for Kafka, and when ready create request and response topics.
      */
