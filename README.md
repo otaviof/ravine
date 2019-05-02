@@ -11,3 +11,14 @@
 </p>
 
 # `ravine`
+
+Ravine works as a bridge between HTTP requests and Kafka messages. It handles HTTP requests using Confluent
+Schema-Registry to validate contracts, and then dispatch a message in Kafka, waiting to receive a response
+message from another topic.
+
+Therefore, it enables you to focus on Kafka based applications, while Ravine will handle external world
+HTTP requests. 
+
+<p align="center">
+    <img alt="Basic workflow" src="https://raw.githubusercontent.com/otaviof/ravine/master/assets/diagrams/ravine-diag.png"/>
+</p>
