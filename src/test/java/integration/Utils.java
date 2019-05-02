@@ -61,7 +61,9 @@ class Utils {
                 .collect(Collectors.toList());
 
         admin.createTopics(topicsCollection);
+        admin.close();
     }
+
 
     /**
      * Read a resource based file, based in informed path.
