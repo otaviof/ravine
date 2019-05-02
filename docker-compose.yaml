@@ -22,7 +22,7 @@ services:
       KAFKA_HOST_NAME: kafka
       KAFKA_ADVERTISED_HOST_NAME: kafka
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAKFA_OPTS: -Djavax.net.debug=all
       KAFKA_LOG4J_ROOT_LOGLEVEL: info
     depends_on:
