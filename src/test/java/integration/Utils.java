@@ -13,8 +13,9 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 @Slf4j
 class Utils {
@@ -45,19 +46,21 @@ class Utils {
     /**
      * Create a kafka topic using admin client.
      *
-     * @param brokers brokers list;
-     * @param topic topic name;
+     * @param broker brokers list;
+     * @param topics topic names;
      */
-    static void createKafkaTopic(String brokers, String topic) {
-        log.info("Creating Kafka topic '{}' in Kafka brokers '{}'...", topic, brokers);
+    static void createKafkaTopics(String broker, List<String> topics) {
+        log.info("Creating Kafka topics '{}' in Kafka broker '{}'...", topics, broker);
 
         var adminProperties = new Properties();
-        adminProperties.put("bootstrap.servers", brokers);
+        adminProperties.put("bootstrap.servers", broker);
 
         var admin = KafkaAdminClient.create(adminProperties);
+        var topicsCollection = topics.stream()
+                .map(t -> new NewTopic(t, 1, (short) 1))
+                .collect(Collectors.toList());
 
-        var topicSpec = new NewTopic(topic, 1, (short) 1);
-        admin.createTopics(Collections.singleton(topicSpec));
+        admin.createTopics(topicsCollection);
     }
 
     /**

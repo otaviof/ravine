@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
@@ -48,8 +49,7 @@ public class RavineTest {
         log.info("Waiting for Kafka broker at '{}'", broker);
         await().atMost(60, TimeUnit.SECONDS).until(() -> Utils.isPortOpen(broker));
 
-        Utils.createKafkaTopic(broker, "kafka_request_topic");
-        Utils.createKafkaTopic(broker, "kafka_response_topic");
+        Utils.createKafkaTopics(broker, Arrays.asList("kafka_request_topic", "kafka_response_topic"));
     }
 
     /**
