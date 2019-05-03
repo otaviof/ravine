@@ -1,6 +1,11 @@
 buildscript {
     repositories {
         mavenCentral()
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+
+        maven { url "http://repo1.maven.org/maven2/" }
     }
     ext {
         avroVersion = '1.8.2'
@@ -15,6 +20,7 @@ buildscript {
 }
 
 apply plugin: 'java'
+apply plugin: 'jacoco'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
@@ -62,7 +68,7 @@ tasks.withType(Test) {
     }
 }
 
-test {
+task verify(type: Test, dependsOn: testClasses) {
     filter {
         includeTestsMatching "io.github.otaviof.ravine.*"
     }
@@ -75,3 +81,22 @@ task integration(type: Test, dependsOn: testClasses) {
     }
 }
 
+task coverage(type: JacocoReport) {
+    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+
+    subprojects.each {
+        sourceSets it.sourceSets.main
+    }
+
+    reports {
+        xml.enabled true
+        xml { destination file("${buildDir}/reports/jacoco/report.xml") }
+        html.enabled false
+        csv.enabled false
+    }
+}
+
+coverage {
+    dependsOn verify
+    dependsOn integration
+}
