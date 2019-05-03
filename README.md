@@ -2,6 +2,9 @@
     <img src="https://raw.githubusercontent.com/otaviof/ravine/master/assets/logo/ravine.png"/>
 </p>
 <p align="center">
+    <a alt="Code Coverage" href="https://codecov.io/gh/otaviof/ravine">
+        <img alt="Code Coverage" src="https://codecov.io/gh/otaviof/ravine/branch/master/graph/badge.svg">
+    </a>
     <a alt="CI Status" href="https://travis-ci.com/otaviof/ravine">
         <img alt="CI Status" src="https://travis-ci.com/otaviof/ravine.svg?branch=master">
     </a>
