@@ -20,7 +20,7 @@ ravine:
       request:
         topic: kafka_request_topic
         valueSerde: io.confluent.kafka.streams.serdes.avro.GenericAvroSerializer
+        timeoutMs: 2000
       response:
-        topic: kafka_request_topic
-        # topic: kafka_response_topic
-
+        topic: kafka_response_topic
+        timeoutMs: 5000

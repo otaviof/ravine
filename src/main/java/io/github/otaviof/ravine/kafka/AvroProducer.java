@@ -76,8 +76,7 @@ class AvroProducer {
         this.kafkaConfig = kafkaConfig;
         this.routeConfig = routeConfig;
 
-        log.info("Creating a producer for '{}'", routeConfig);
-
+        log.info("Creating a producer on topic '{}'", routeConfig.getTopic());
         this.producer = new KafkaProducer<>(producerProperties());
     }
 }

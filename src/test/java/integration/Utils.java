@@ -20,6 +20,18 @@ import java.util.stream.Collectors;
 @Slf4j
 class Utils {
     /**
+     * Wrapper around thread.sleep without exceptions to handle.
+     *
+     * @param ms sleep interval in ms;
+     */
+    static void sleep(int ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException ignored) {
+        }
+    }
+
+    /**
      * Simple tcp socket probe.
      *
      * @param hostAndPortString String, with Kafka's bootstrap server;
@@ -37,7 +49,7 @@ class Utils {
             return true;
         } catch (Exception e) {
             log.warn("Port '{}' is NOT YET open at '{}' ('{}')", port, hostname, e.getMessage());
-            Thread.sleep(500);
+            sleep(500);
             return false;
         }
 

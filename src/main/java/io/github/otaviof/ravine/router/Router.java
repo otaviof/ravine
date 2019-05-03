@@ -52,8 +52,8 @@ public class Router {
 
         try {
             log.info("Waiting for maximum of '{} ms' for UUID '{}' to come back...", timeout, uuid);
-            await().atMost(timeout, TimeUnit.MILLISECONDS).until(
-                    () -> specificEventListener.inCache(uuid));
+            await().atMost(timeout, TimeUnit.MILLISECONDS)
+                    .until(() -> specificEventListener.inCache(uuid));
         } catch (ConditionTimeoutException e) {
             log.error("Timeout on calling out path '{}' after '{}' ms.", path, timeout);
             throw new RouteTimeoutException(e.getMessage());

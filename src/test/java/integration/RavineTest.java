@@ -4,6 +4,8 @@ import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientExcept
 import io.github.otaviof.ravine.Ravine;
 import io.github.otaviof.ravine.config.Config;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootContextLoader;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -38,18 +41,32 @@ public class RavineTest {
     @Autowired
     Config config;
 
+    @Autowired
+    ApplicationEventPublisher publisher;
+
     @BeforeClass
     public static void prepare() throws IOException, RestClientException {
         PrepareBackend.prepare();
     }
 
-    @Test
-    public void executeRequest() throws Exception {
+    @Before
+    public void usingDifferentTopics() {
+        var routes = config.getRoutes().get(0);
+        Assert.assertNotEquals(routes.getRequest().getTopic(), routes.getResponse().getTopic());
+    }
+
+    @Before
+    public void prepareExternalActor() {
         var path = config.getRoutes().get(0).getRoute();
-        var externalActor = new ExternalActor(config, path);
+        var externalActor = new ExternalActor(publisher, config, path);
 
         externalActor.bootstrap();
         await().atMost(60, TimeUnit.SECONDS).until(externalActor::isConsumerReady);
+    }
+
+    @Test
+    public void executeRequest() throws Exception {
+        var path = config.getRoutes().get(0).getRoute();
 
         mockMvc.perform(MockMvcRequestBuilders
                 .post(path)

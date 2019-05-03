@@ -29,6 +29,16 @@ public class SpecificEventListener implements ApplicationListener<Event> {
     }
 
     /**
+     * Retrieve an event from cache.
+     *
+     * @param key string key name;
+     * @return Event object;
+     */
+    Event getEvent(String key) {
+        return cache.get(key);
+    }
+
+    /**
      * Given timeout, remove from cache events that are older than that.
      *
      * @param timeoutMs timeout in milliseconds;
@@ -45,16 +55,6 @@ public class SpecificEventListener implements ApplicationListener<Event> {
     }
 
     /**
-     * Retrieve an event from cache.
-     *
-     * @param key string key name;
-     * @return Event object;
-     */
-    Event getEvent(String key) {
-        return cache.get(key);
-    }
-
-    /**
      * Store received events in cache.
      *
      * @param event Event object;
@@ -62,6 +62,10 @@ public class SpecificEventListener implements ApplicationListener<Event> {
     @Override
     public void onApplicationEvent(Event event) {
         log.info("Received application event key: '{}'", event.getK());
+        if (inCache(event.getK())) {
+            log.debug("Event key '{}' is already in cache", event.getK());
+            return;
+        }
         cache.put(event.getK(), event);
     }
 

@@ -13,14 +13,14 @@ public class ExternalActorEventListener implements ApplicationListener<Event> {
     @Override
     public void onApplicationEvent(Event event) {
         try {
-            log.info("Test event received, key: '{}'", event.getK());
+            log.info("[TEST] event received, key: '{}', value: '{}'", event.getK(), event.getV());
             this.producer.send(event.getK(), event.getV());
         } catch (AvroProducerException e) {
             e.printStackTrace();
         }
     }
 
-    public ExternalActorEventListener(AvroProducer producer) {
+    ExternalActorEventListener(AvroProducer producer) {
         this.producer = producer;
     }
 }

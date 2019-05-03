@@ -50,19 +50,17 @@ public class AvroConsumer implements Runnable {
         log.info("Consumer bootstrap servers: '{}'", brokers);
         p.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
 
-        p.put(StreamsConfig.APPLICATION_ID_CONFIG, "ravine");
+        p.put(StreamsConfig.APPLICATION_ID_CONFIG, routeConfig.getGroupId());
         p.put(StreamsConfig.CLIENT_ID_CONFIG, routeConfig.getClientId());
         p.put(StreamsConfig.consumerPrefix(ConsumerConfig.GROUP_ID_CONFIG), routeConfig.getGroupId());
 
-        p.put(StreamsConfig.consumerPrefix(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG), "latest");
+        p.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
 
         // mandatory for consumers as well, in order to consumer generic avro
         p.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, kafkaConfig.getSchemaRegistryUrl());
 
-        p.put(StreamsConfig.consumerPrefix(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG),
-                StringDeserializer.class.getName());
-        p.put(StreamsConfig.consumerPrefix(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG),
-                routeConfig.getValueSerde());
+        p.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        p.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, routeConfig.getValueSerde());
         p.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         p.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, routeConfig.getValueSerde());
 
