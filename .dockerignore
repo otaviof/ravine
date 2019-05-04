@@ -1,0 +1,15 @@
+*.iml
+*.md
+*/**/*.jar
+.DS_Store
+.ci*
+.classpath
+.env
+.git*
+.idea
+.project
+.settings
+.travis*
+.vscode
+build/
+

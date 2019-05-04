@@ -1,28 +1,13 @@
-buildscript {
-    ext {
-        avroVersion = '1.8.2'
-        lombokVersion = '1.18.6'
-        springVersion = '2.1.4.RELEASE'
-        confluentVersion = '5.2.1'
-        kafkaStreamsVersion = '2.2.0'
-    }
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springVersion}")
-    }
+plugins {
+    id 'java'
+    id 'jacoco'
+    id 'idea'
+    id 'net.researchgate.release' version '2.6.0'
+    id 'org.springframework.boot' version '2.1.4.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.7.RELEASE'
 }
 
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'jacoco'
-apply plugin: 'idea'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
-
 group = 'io.github.otaviof'
-version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
 repositories {
@@ -42,6 +27,7 @@ dependencies {
     testAnnotationProcessor("org.projectlombok:lombok:${lombokVersion}")
 
     compile("org.apache.avro:avro:${avroVersion}")
+    compile("org.apache.commons:commons-lang3:${apacheCommonsVersion}")
 
     compile("io.confluent:kafka-avro-serializer:${confluentVersion}")
     compile("io.confluent:kafka-streams-avro-serde:${confluentVersion}")
@@ -49,7 +35,7 @@ dependencies {
     compile("org.apache.kafka:kafka-streams:${kafkaStreamsVersion}")
     compile("org.apache.kafka:kafka-clients:${kafkaStreamsVersion}")
 
-    compile("org.awaitility:awaitility:3.1.6")
+    compile("org.awaitility:awaitility:${awaitilityVersion}")
     compile("io.opentracing.contrib:opentracing-kafka-client:0.1.1")
 
     compile("org.springframework.boot:spring-boot-starter-web:${springVersion}",
@@ -59,6 +45,31 @@ dependencies {
 
     implementation('org.springframework.boot:spring-boot-starter')
     testImplementation('org.springframework.boot:spring-boot-starter-test')
+}
+
+bootJar {
+    manifest {
+        attributes('Implementation-Title': project.name,
+                   'Implementation-Version': project.version)
+    }
+    version = null
+    mainClassName = "io.github.otaviof.ravine.Ravine"
+}
+
+assemble.dependsOn(bootJar)
+
+release {
+    tagTemplate = '${version}'
+    versionPropertyFile = 'gradle.properties'
+}
+
+
+test {
+    testLogging {
+        events 'failed'
+        exceptionFormat 'full'
+    }
+    beforeTest { descriptor -> logger.lifecycle("## Testing: $descriptor.className") }
 }
 
 tasks.withType(Test) {
@@ -71,7 +82,6 @@ task verify(type: Test, dependsOn: testClasses) {
     filter {
         includeTestsMatching("io.github.otaviof.ravine.*")
     }
-    beforeTest { descriptor -> logger.lifecycle("## Testing: $descriptor.className") }
 }
 
 task integration(type: Test, dependsOn: testClasses) {
@@ -80,17 +90,17 @@ task integration(type: Test, dependsOn: testClasses) {
     }
 }
 
-task coverage(type: JacocoReport) {
-    executionData(fileTree(project.rootDir.absolutePath).include("${buildDir}/jacoco/*.exec"))
+test.dependsOn(jacocoTestReport)
+verify.finalizedBy(jacocoTestReport)
+integration.finalizedBy(jacocoTestReport)
 
+task coverage(type: JacocoReport, dependsOn: [verify, integration]) {
+    sourceSets sourceSets.main
+    executionData verify
+    executionData integration
     reports {
         xml.enabled(true)
-        xml.destination(file("${buildDir}/reports/jacoco/report.xml"))
+        xml.destination(file("${buildDir}/reports/jacoco.xml"))
         html.enabled(false)
-        csv.enabled(false)
     }
 }
-
-coverage.dependsOn(verify)
-coverage.dependsOn(integration)
-

@@ -13,10 +13,9 @@ addons:
 before_script:
   - docker-compose up -d
   - sleep 60
-  - ./gradlew assemble
 script:
-  - ./gradlew --info verify integration
-  - ./gradlew coverage
+  - ./gradlew --console plain --info --exclude-task test assemble
+  - ./gradlew --console plain --info coverage
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 before_cache:
