@@ -49,12 +49,12 @@ The following diagram represents the high level relationship between Ravine and 
 
 In order to run tests locally, you need to spin up the necessary backend systems, namely
 [Apache Kafka][kafka] (which depends on [Apache ZooKeeper][zookeeper]), and
-[Confluent Schema-Registry][scehmaregistry]. They are wired up using [Docker-Compose][./docker-compose.yaml]
+[Confluent Schema-Registry][scehmaregistry]. They are wired up using [Docker-Compose](./docker-compose.yaml)
 in a way that Ravine can reach requested backend, and using `localtest.me`[localtestme] hostnames to 
 simulate DNS for Kafka.
 
 The steps required on your laptop are the same needed during CI, so please consider
-[`travis.yml`][./.travis.yml] as documentation.
+[`travis.yml`](./.travis.yml) as documentation.
 
 [kafka]: https://kafka.apache.org
 [zookeeper]: https://zookeeper.apache.org
