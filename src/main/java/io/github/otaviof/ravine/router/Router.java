@@ -22,7 +22,6 @@ import static org.awaitility.Awaitility.await;
 public class Router {
     private final Config config;
     private final SpecificEventListener specificEventListener;
-    private final ConsumerGroup consumerGroup;
     private final ProducerGroup producerGroup;
 
     /**
@@ -73,9 +72,8 @@ public class Router {
         this.config = config;
         this.specificEventListener = specificEventListener;
 
-        this.consumerGroup = consumerGroup;
-        this.consumerGroup.bootstrap();
-        this.consumerGroup.waitForConsumers();
+        consumerGroup.bootstrap();
+        consumerGroup.waitForConsumers();
 
         this.producerGroup = producerGroup;
     }

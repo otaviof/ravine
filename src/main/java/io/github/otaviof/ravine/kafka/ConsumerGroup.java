@@ -25,7 +25,7 @@ public class ConsumerGroup implements ApplicationEventPublisherAware {
     private final Config config;
 
     private ApplicationEventPublisher eventPublisher;
-    private Map<AvroConsumer, Thread> consumerThreads;
+    private final Map<AvroConsumer, Thread> consumerThreads;
 
     /**
      * Receive ApplicationEvent publisher instance.
@@ -42,9 +42,9 @@ public class ConsumerGroup implements ApplicationEventPublisherAware {
      */
     @PostConstruct
     public void waitForConsumers() {
-        log.info("Waiting for consumers to be ready (max '{} ms')...", config.getStartUp().getTimeoutMs());
-        await().atMost(config.getStartUp().getTimeoutMs(), TimeUnit.MILLISECONDS).until(() -> {
-            Thread.sleep(config.getStartUp().getCheckIntervalMs());
+        log.info("Waiting for consumers to be ready (max '{} ms')...", config.getStartup().getTimeoutMs());
+        await().atMost(config.getStartup().getTimeoutMs(), TimeUnit.MILLISECONDS).until(() -> {
+            Thread.sleep(config.getStartup().getCheckIntervalMs());
             var runningConsumers = consumerThreads.keySet().stream()
                     .filter(AvroConsumer::isRunning)
                     .collect(Collectors.toList());

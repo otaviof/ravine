@@ -13,7 +13,7 @@ import java.util.Date;
 public class Event extends ApplicationEvent {
     private final String k;
     private final GenericRecord v;
-    private Date createdAt;
+    private final Date createdAt;
 
     public Event(Object source, String k, GenericRecord v) {
         super(source);

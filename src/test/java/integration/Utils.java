@@ -24,7 +24,7 @@ class Utils {
      *
      * @param ms sleep interval in ms;
      */
-    static void sleep(int ms) {
+    private static void sleep(int ms) {
         try {
             Thread.sleep(ms);
         } catch (InterruptedException ignored) {
@@ -37,7 +37,7 @@ class Utils {
      * @param hostAndPortString String, with Kafka's bootstrap server;
      * @return Boolean;
      */
-    static Boolean isPortOpen(String hostAndPortString) throws InterruptedException {
+    static Boolean isPortOpen(String hostAndPortString) {
         String[] hostAndPort = hostAndPortString.split(":");
         String hostname = hostAndPort[0];
         Integer port = Integer.parseInt(hostAndPort[1]);
@@ -52,7 +52,6 @@ class Utils {
             sleep(500);
             return false;
         }
-
     }
 
     /**

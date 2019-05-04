@@ -15,7 +15,7 @@ import java.util.List;
 @Getter
 @Setter
 public class Config {
-    private StartUpConfig startUp;
+    private StartUpConfig startup;
     private KafkaConfig kafka;
     private List<RouteConfig> routes;
 

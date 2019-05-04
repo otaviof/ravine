@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 
 @Slf4j
-public class ExternalActorEventListener implements ApplicationListener<Event> {
+class ExternalActorEventListener implements ApplicationListener<Event> {
     private final AvroProducer producer;
 
     @Override

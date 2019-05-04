@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class SpecificEventListener implements ApplicationListener<Event> {
-    private Map<String, Event> cache;
+    private final Map<String, Event> cache;
 
     /**
      * Check if a given key is in listener's cache.
@@ -51,7 +51,7 @@ public class SpecificEventListener implements ApplicationListener<Event> {
                 .collect(Collectors.toCollection(HashSet::new));
 
         log.info("Expiring '{}' entries in cache...", toDelete.size());
-        toDelete.forEach(c -> cache.remove(c));
+        toDelete.forEach(cache::remove);
     }
 
     /**

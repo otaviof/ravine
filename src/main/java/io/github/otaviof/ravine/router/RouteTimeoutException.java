@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
-public class RouteTimeoutException extends RuntimeException {
+class RouteTimeoutException extends RuntimeException {
     public RouteTimeoutException(String message) {
         super(message);
     }

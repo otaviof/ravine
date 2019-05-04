@@ -29,9 +29,9 @@ import java.util.Map;
 public class ProducerGroup {
     private final Config config;
 
-    private Map<String, AvroProducer> producers;
-    private Map<String, Schema> reqSchemas;
-    private SchemaRegistry schemaRegistry;
+    private final Map<String, AvroProducer> producers;
+    private final Map<String, Schema> reqSchemas;
+    private final SchemaRegistry schemaRegistry;
 
     /**
      * Produce a message in Kafka topic.
@@ -63,18 +63,16 @@ public class ProducerGroup {
         log.info("Parsing request body against Schema '{}'", schema.getName());
         log.debug("Message body informed is: '{}'", new String(payload));
 
-        GenericRecord record = null;
         try {
             var dec = DecoderFactory.get().jsonDecoder(schema, input);
-            record = reader.read(null, dec);
+            var record = reader.read(null, dec);
             writer.write(record, enc);
             enc.flush();
+            return record;
         } catch (IOException | AvroTypeException e) {
             log.error("Error on parsing message body: '{}', caused by '{}'", e.getMessage(), e.getCause());
             throw new InvalidPayloadException(e.getMessage());
         }
-
-        return record;
     }
 
     /**

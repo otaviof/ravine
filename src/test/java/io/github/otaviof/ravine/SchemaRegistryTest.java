@@ -16,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 public class SchemaRegistryTest {
     private SubjectConfig subject;
 
-    SchemaRegistry schemaRegistry = new SchemaRegistry("http://127.0.0.1:8681");
+    private final SchemaRegistry schemaRegistry = new SchemaRegistry("http://127.0.0.1:8681");
 
     @BeforeClass
     public static void prepare() throws IOException, RestClientException {

@@ -14,7 +14,7 @@ public class PrepareBackend {
     /**
      * Waiting for Kafka, and when ready create request and response topics.
      */
-    public static void waitForKafka() {
+    private static void waitForKafka() {
         var broker = "kafka.localtest.me:9092";
 
         log.info("Waiting for Kafka broker at '{}'", broker);
