@@ -4,7 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -12,11 +15,17 @@ import java.util.List;
  */
 @Component
 @ConfigurationProperties("ravine")
+@Validated
 @Getter
 @Setter
 public class Config {
+    @NotNull
     private StartUpConfig startup;
+
+    @NotNull
     private KafkaConfig kafka;
+
+    @NotEmpty
     private List<RouteConfig> routes;
 
     /**
@@ -26,6 +35,9 @@ public class Config {
      * @return RouteConfig;
      */
     public RouteConfig getRouteByPath(String path) {
-        return routes.stream().filter(r -> r.getRoute().equals(path)).findAny().orElse(null);
+        return routes.stream()
+                .filter(r -> r.getEndpoint().getPath().equals(path))
+                .findAny()
+                .orElse(null);
     }
 }

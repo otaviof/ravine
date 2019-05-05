@@ -3,12 +3,27 @@ package io.github.otaviof.ravine.config;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
+
+/**
+ * Represents a route entry in main configuration.
+ */
 @Getter
 @Setter
 public class RouteConfig {
+    @NotEmpty
     private String name;
-    private String route;
+
+    @NotNull
+    private EndpointConfig endpoint;
+
+    @NotNull
     private SubjectConfig subject;
+
+    @NotNull
     private KafkaRouteConfig request;
+
     private KafkaRouteConfig response;
 }

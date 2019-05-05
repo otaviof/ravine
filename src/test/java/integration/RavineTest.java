@@ -35,6 +35,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Slf4j
 public class RavineTest {
+    private static final String PERSON_PAYLOAD = "{ \"firstName\": \"ravine\", \"lastName\": \"test\" }";
+
     @Autowired
     MockMvc mockMvc;
 
@@ -57,7 +59,7 @@ public class RavineTest {
 
     @Before
     public void prepareExternalActor() {
-        var path = config.getRoutes().get(0).getRoute();
+        var path = config.getRoutes().get(0).getEndpoint().getPath();
         var externalActor = new ExternalActor(publisher, config, path);
 
         externalActor.bootstrap();
@@ -65,16 +67,27 @@ public class RavineTest {
     }
 
     @Test
-    public void executeRequest() throws Exception {
-        var path = config.getRoutes().get(0).getRoute();
+    public void executePostRequest() throws Exception {
+        var path = config.getRoutes().get(0).getEndpoint().getPath();
 
         mockMvc.perform(MockMvcRequestBuilders
                 .post(path)
-                .content("{ \"firstName\": \"ravine\", \"lastName\": \"test\" }")
+                .content(PERSON_PAYLOAD)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath(".firstName").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath(".lastName").exists());
+    }
+
+    @Test
+    public void executePutRequest() throws Exception {
+        var path = config.getRoutes().get(1).getEndpoint().getPath();
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .put(path)
+                .content(PERSON_PAYLOAD)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 }
