@@ -25,4 +25,6 @@ public class EndpointConfig {
     @Min(100)
     @Max(599)
     private int responseCode = 200;
+
+    private String responseMessage = "";
 }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 
 /**
@@ -33,7 +34,11 @@ public class ApiController {
             produces = "application/json",
             method = {RequestMethod.POST, RequestMethod.PUT})
     @ResponseBody
-    public String handler(HttpServletRequest req, @RequestBody byte[] body) throws Throwable {
+    public String handler(
+            HttpServletRequest req,
+            @RequestBody byte[] body,
+            HttpServletResponse res
+    ) throws Throwable {
         var path = req.getRequestURI().substring(req.getContextPath().length());
         var contentLength = req.getContentLength();
         var bos = new ByteArrayOutputStream(contentLength >= 0 ? contentLength : StreamUtils.BUFFER_SIZE);
@@ -41,7 +46,11 @@ public class ApiController {
         StreamUtils.copy(body, bos);
 
         log.info("Handling request for '{}' path", path);
-        return router.route(req.getMethod(), path, bos.toByteArray());
+
+        var routingResult = router.route(req.getMethod(), path, bos.toByteArray());
+        res.setStatus(routingResult.getStatusCode());
+
+        return routingResult.getPayload();
     }
 
     public ApiController(Router router) {

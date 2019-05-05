@@ -88,6 +88,6 @@ public class RavineTest {
                 .put(path)
                 .content(PERSON_PAYLOAD)
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 }

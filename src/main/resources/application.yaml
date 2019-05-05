@@ -31,7 +31,8 @@ ravine:
         path: /v1/group/app/action/put
         methods:
           - put
-        responseCode: 204
+        responseCode: 201
+        responseMessage: Created!
       subject:
         name: person
       request:

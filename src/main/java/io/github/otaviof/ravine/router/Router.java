@@ -37,13 +37,13 @@ public class Router {
      * @param method request method;
      * @param path request path;
      * @param body request body;
-     * @return String with event content;
+     * @return RouteConfig with event content and status-code;
      * @throws RouteNotFoundException on not being able to route based on path;
      * @throws MethodNotAllowedOnPathException http request method is not configured on path;
      * @throws ProducerErrorException error on producing a message;
      * @throws RouteTimeoutException timeout on waiting for response;
      */
-    public String route(String method, String path, byte[] body) throws
+    public RoutingResult route(String method, String path, byte[] body) throws
             RouteNotFoundException,
             MethodNotAllowedOnPathException,
             ProducerErrorException,
@@ -51,6 +51,7 @@ public class Router {
         log.info("Routing request '{}' for path '{}' ({} bytes)", method, path, body.length);
 
         var routeConfig = prepare(method, path);
+        var endpoint = routeConfig.getEndpoint();
         var uuid = UUID.randomUUID().toString();
 
         try {
@@ -61,10 +62,12 @@ public class Router {
 
         if (routeConfig.getResponse() == null) {
             log.info("Empty response topic, therefore just dispatching event.");
-            return "";
+            return new RoutingResult(endpoint.getResponseCode(), endpoint.getResponseMessage());
         }
 
-        return waitForResponse(path, uuid, routeConfig.getResponse().getTimeoutMs());
+        return new RoutingResult(
+                endpoint.getResponseCode(),
+                waitForResponse(path, uuid, routeConfig.getResponse().getTimeoutMs()));
     }
 
     /**
