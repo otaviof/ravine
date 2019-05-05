@@ -43,6 +43,7 @@ public class ProducerGroup {
      */
     public void send(String path, String key, byte[] payload) throws AvroProducerException {
         var record = convertToAvro(payload, reqSchemas.get(path));
+        log.info("Producing message with key '{}' for path '{}'", key, path);
         producers.get(path).send(key, record);
     }
 
@@ -83,7 +84,7 @@ public class ProducerGroup {
      */
     private void bootstrap() throws SchemaRegistryException {
         for (RouteConfig route : config.getRoutes()) {
-            var routePath = route.getRoute();
+            var routePath = route.getEndpoint().getPath();
 
             log.info("Kafka producer named '{}' for '{}' route", route.getName(), routePath);
             producers.put(routePath, new AvroProducer(config.getKafka(), route.getRequest()));

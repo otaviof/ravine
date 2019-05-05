@@ -12,11 +12,13 @@ ravine:
     schemaRegistryUrl: http://schemaregistry.localtest.me:8681
     brokers: kafka.localtest.me:9092
   routes:
-    - name: example
-      route: /v1/group/app/action
+    - name: post-endpoint-example
+      endpoint:
+        path: /v1/group/app/action/post
+        methods:
+          - post
       subject:
         name: person
-        version: 1
       request:
         topic: kafka_request_topic
         valueSerde: io.confluent.kafka.streams.serdes.avro.GenericAvroSerializer
@@ -24,3 +26,15 @@ ravine:
       response:
         topic: kafka_response_topic
         timeoutMs: 5000
+    - name: put-endpoint-example
+      endpoint:
+        path: /v1/group/app/action/put
+        methods:
+          - put
+        responseCode: 204
+      subject:
+        name: person
+      request:
+        topic: kafka_dump_topic
+        timeoutMs: 2000
+        valueSerde: io.confluent.kafka.streams.serdes.avro.GenericAvroSerializer

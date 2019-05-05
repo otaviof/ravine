@@ -59,9 +59,16 @@ public class ConsumerGroup implements ApplicationEventPublisherAware {
      */
     public void bootstrap() {
         for (RouteConfig route : config.getRoutes()) {
-            log.info("Creating a consumer for route responses...");
+            log.info("Creating consumer for route named '{}'", route.getName());
+
+            if (route.getResponse() == null) {
+                log.info("Skipping consumer on route!");
+                continue;
+            }
+
             var consumer = new AvroConsumer(eventPublisher, config.getKafka(), route.getResponse());
             var thread = new Thread(consumer);
+
             thread.start();
             consumerThreads.put(consumer, thread);
         }

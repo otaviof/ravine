@@ -10,6 +10,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.errors.TimeoutException;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.util.Properties;
@@ -43,8 +44,10 @@ class AvroProducer {
         p.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         p.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, routeConfig.getValueSerde());
 
+        log.info("Producer blocking timeout is '{}' ms, and '{}' set as acknowledge mode.",
+                routeConfig.getTimeoutMs(), routeConfig.getAcks());
         p.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, routeConfig.getTimeoutMs());
-        p.put(ProducerConfig.ACKS_CONFIG, "all");
+        p.put(ProducerConfig.ACKS_CONFIG, routeConfig.getAcks());
 
         p.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, TracingProducerInterceptor.class.getName());
 
@@ -66,7 +69,7 @@ class AvroProducer {
             producer.send(record).get();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-        } catch (ExecutionException e) {
+        } catch (ExecutionException | TimeoutException e) {
             log.error("Error producing message on topic '{}': '{}'", topic, e.getMessage());
             throw new AvroProducerException(e.getMessage());
         }
