@@ -10,7 +10,6 @@ services:
       ZOOKEEPER_LOG4J_ROOT_LOGLEVEL: info
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-
   kafka:
     image: confluentinc/cp-kafka:5.2.1-1
     ports:
@@ -29,7 +28,6 @@ services:
       KAFKA_LOG4J_ROOT_LOGLEVEL: info
     depends_on:
       - zookeeper
-
   schemaregistry:
     image: confluentinc/cp-schema-registry:5.2.1-1
     ports:
@@ -45,3 +43,15 @@ services:
       SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: info
     depends_on:
       - kafka
+#  jaeger:
+#    image: jaegertracing/all-in-one:latest
+#    environment:
+#      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+#    ports:
+#      - 5775:5775/udp
+#      - 5778:5778
+#      - 6831:6831/udp
+#      - 6832:6832/udp
+#      - 9411:9411
+#      - 14268:14268
+#      - 16686:16686

@@ -27,21 +27,29 @@ dependencies {
     testAnnotationProcessor("org.projectlombok:lombok:${lombokVersion}")
 
     compile("org.apache.avro:avro:${avroVersion}")
-    compile("org.apache.commons:commons-lang3:${apacheCommonsVersion}")
-
     compile("io.confluent:kafka-avro-serializer:${confluentVersion}")
     compile("io.confluent:kafka-streams-avro-serde:${confluentVersion}")
 
     compile("org.apache.kafka:kafka-streams:${kafkaStreamsVersion}")
     compile("org.apache.kafka:kafka-clients:${kafkaStreamsVersion}")
 
+    compile("org.apache.commons:commons-lang3:${apacheCommonsVersion}")
     compile("org.awaitility:awaitility:${awaitilityVersion}")
-    compile("io.opentracing.contrib:opentracing-kafka-client:0.1.1")
+
+    compile("io.opentracing.contrib:opentracing-spring-cloud-starter:${otSpringStarterVersion}")
+    compile("io.opentracing.contrib:opentracing-spring-tracer-configuration-starter:${otSpringTracerConfigVersion}")
+    
+    compile("io.opentracing.contrib:opentracing-kafka-client:${otKafkaClientVersion}")
+    compile("io.opentracing.contrib:opentracing-kafka-streams:${otKafkaStreamsVersion}")
+
+    compile("io.opentracing.contrib:opentracing-spring-jaeger-starter:${otSpringJaegerVersion}")
+    compile("io.jaegertracing:jaeger-core:${jaegerCoreVersion}")
 
     compile("org.springframework.boot:spring-boot-starter-web:${springVersion}",
             "org.springframework.boot:spring-boot-starter-logging:${springVersion}",
             "org.springframework.boot:spring-boot-configuration-processor:${springVersion}",
-            "org.springframework.boot:spring-boot-starter-actuator:${springVersion}")
+            "org.springframework.boot:spring-boot-starter-actuator:${springVersion}",
+            "org.springframework.boot:spring-boot-starter-validation:${springVersion}")
 
     implementation('org.springframework.boot:spring-boot-starter')
     testImplementation('org.springframework.boot:spring-boot-starter-test')
@@ -62,7 +70,6 @@ release {
     tagTemplate = '${version}'
     versionPropertyFile = 'gradle.properties'
 }
-
 
 test {
     testLogging {
@@ -90,7 +97,6 @@ task integration(type: Test, dependsOn: testClasses) {
     }
 }
 
-test.dependsOn(jacocoTestReport)
 verify.finalizedBy(jacocoTestReport)
 integration.finalizedBy(jacocoTestReport)
 
