@@ -4,6 +4,9 @@ import io.github.otaviof.ravine.config.Config;
 import io.github.otaviof.ravine.config.RouteConfig;
 import io.github.otaviof.ravine.confluent.SchemaRegistry;
 import io.github.otaviof.ravine.confluent.SchemaRegistryException;
+import io.github.otaviof.ravine.errors.AvroProducerException;
+import io.github.otaviof.ravine.errors.InvalidPayloadException;
+import io.opentracing.Tracer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.AvroTypeException;
 import org.apache.avro.Schema;
@@ -27,6 +30,7 @@ import java.util.Map;
 @Component
 @Slf4j
 public class ProducerGroup {
+    private final Tracer tracer;
     private final Config config;
 
     private final Map<String, AvroProducer> producers;
@@ -85,16 +89,21 @@ public class ProducerGroup {
     private void bootstrap() throws SchemaRegistryException {
         for (RouteConfig route : config.getRoutes()) {
             var routePath = route.getEndpoint().getPath();
+            var subject = route.getSubject();
+            var spanName = String.format("route=%s,subject=%s,version=%d",
+                    routePath, subject.getName(), subject.getVersion());
 
             log.info("Kafka producer named '{}' for '{}' route", route.getName(), routePath);
-            producers.put(routePath, new AvroProducer(config.getKafka(), route.getRequest()));
+            producers.put(routePath, new AvroProducer(
+                    tracer, spanName, config.getKafka(), route.getRequest()));
 
             log.info("Registering schema for route...");
-            reqSchemas.put(routePath, schemaRegistry.getSubject(route.getSubject()));
+            reqSchemas.put(routePath, schemaRegistry.getSubject(subject));
         }
     }
 
-    public ProducerGroup(Config config) throws SchemaRegistryException {
+    public ProducerGroup(Tracer tracer, Config config) throws SchemaRegistryException {
+        this.tracer = tracer;
         this.config = config;
         this.schemaRegistry = new SchemaRegistry(config.getKafka().getSchemaRegistryUrl());
 

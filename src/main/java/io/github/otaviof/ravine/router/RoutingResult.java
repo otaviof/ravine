@@ -6,11 +6,11 @@ import lombok.Getter;
  * Wrapper to save results of a given endpoint route.
  */
 @Getter
-class RoutingResult {
+public class RoutingResult {
     private int statusCode;
     private String payload;
 
-    RoutingResult(int statusCode, String payload) {
+    public RoutingResult(int statusCode, String payload) {
         this.statusCode = statusCode;
         this.payload = payload;
     }

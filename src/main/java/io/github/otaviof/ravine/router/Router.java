@@ -2,11 +2,11 @@ package io.github.otaviof.ravine.router;
 
 import io.github.otaviof.ravine.config.Config;
 import io.github.otaviof.ravine.config.RouteConfig;
+import io.github.otaviof.ravine.errors.AvroProducerException;
 import io.github.otaviof.ravine.errors.MethodNotAllowedOnPathException;
 import io.github.otaviof.ravine.errors.ProducerErrorException;
 import io.github.otaviof.ravine.errors.RouteNotFoundException;
 import io.github.otaviof.ravine.errors.RouteTimeoutException;
-import io.github.otaviof.ravine.kafka.AvroProducerException;
 import io.github.otaviof.ravine.kafka.ConsumerGroup;
 import io.github.otaviof.ravine.kafka.ProducerGroup;
 import lombok.extern.slf4j.Slf4j;

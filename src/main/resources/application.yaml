@@ -1,8 +1,12 @@
+spring:
+  application:
+    name: ravine
+
 logging:
   level:
     org.apache.kafka.clients.consumer.ConsumerConfig: WARN
     org.apache.kafka.clients.producer.ProducerConfig: WARN
-    io.github.otaviof.ravine: DEBUG
+    io.github.otaviof.ravine: TRACE
 
 ravine:
   startup:
@@ -32,7 +36,8 @@ ravine:
         methods:
           - put
         responseCode: 201
-        responseMessage: Created!
+        responseMessage: |
+          { "msg": "record created!" }
       subject:
         name: person
       request:

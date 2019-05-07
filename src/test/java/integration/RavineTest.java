@@ -3,6 +3,7 @@ package integration;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.otaviof.ravine.Ravine;
 import io.github.otaviof.ravine.config.Config;
+import io.opentracing.Tracer;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
@@ -46,6 +47,9 @@ public class RavineTest {
     @Autowired
     ApplicationEventPublisher publisher;
 
+    @Autowired
+    Tracer tracer;
+
     @BeforeClass
     public static void prepare() throws IOException, RestClientException {
         PrepareBackend.prepare();
@@ -60,7 +64,7 @@ public class RavineTest {
     @Before
     public void prepareExternalActor() {
         var path = config.getRoutes().get(0).getEndpoint().getPath();
-        var externalActor = new ExternalActor(publisher, config, path);
+        var externalActor = new ExternalActor(tracer, publisher, config, path);
 
         externalActor.bootstrap();
         await().atMost(60, TimeUnit.SECONDS).until(externalActor::isConsumerReady);

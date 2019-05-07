@@ -2,6 +2,7 @@ package io.github.otaviof.ravine.kafka;
 
 import io.github.otaviof.ravine.config.Config;
 import io.github.otaviof.ravine.config.RouteConfig;
+import io.opentracing.Tracer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -22,6 +23,7 @@ import static org.awaitility.Awaitility.await;
 @Component
 @Slf4j
 public class ConsumerGroup implements ApplicationEventPublisherAware {
+    private final Tracer tracer;
     private final Config config;
 
     private ApplicationEventPublisher eventPublisher;
@@ -66,7 +68,7 @@ public class ConsumerGroup implements ApplicationEventPublisherAware {
                 continue;
             }
 
-            var consumer = new AvroConsumer(eventPublisher, config.getKafka(), route.getResponse());
+            var consumer = new AvroConsumer(tracer, eventPublisher, config.getKafka(), route.getResponse());
             var thread = new Thread(consumer);
 
             thread.start();
@@ -74,7 +76,8 @@ public class ConsumerGroup implements ApplicationEventPublisherAware {
         }
     }
 
-    public ConsumerGroup(Config config) {
+    public ConsumerGroup(Tracer tracer, Config config) {
+        this.tracer = tracer;
         this.config = config;
         this.consumerThreads = new HashMap<>();
     }

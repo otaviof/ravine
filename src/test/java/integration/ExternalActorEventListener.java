@@ -1,7 +1,7 @@
 package integration;
 
+import io.github.otaviof.ravine.errors.AvroProducerException;
 import io.github.otaviof.ravine.kafka.AvroProducer;
-import io.github.otaviof.ravine.kafka.AvroProducerException;
 import io.github.otaviof.ravine.router.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;

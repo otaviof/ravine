@@ -3,16 +3,15 @@ package io.github.otaviof.ravine.kafka;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.github.otaviof.ravine.config.KafkaConfig;
 import io.github.otaviof.ravine.config.KafkaRouteConfig;
-import io.github.otaviof.ravine.router.Event;
+import io.opentracing.Tracer;
+import io.opentracing.contrib.kafka.streams.TracingKafkaClientSupplier;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.KStream;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Properties;
@@ -23,7 +22,8 @@ import java.util.Properties;
  */
 @Slf4j
 public class AvroConsumer implements Runnable {
-    private final ApplicationEventPublisher eventPublisher;
+    private final Tracer tracer;
+    private final ApplicationEventPublisher publisher;
     private final KafkaConfig kafkaConfig;
     private final KafkaRouteConfig routeConfig;
 
@@ -72,18 +72,15 @@ public class AvroConsumer implements Runnable {
      */
     private void build() {
         var builder = new StreamsBuilder();
+        var topology = builder.build();
+        var supplier = new TracingKafkaClientSupplier(tracer);
         var topic = routeConfig.getTopic();
 
-        log.info("Starting Kafka consumer on topic '{}'", topic);
-        KStream<String, GenericRecord> events = builder.stream(topic);
+        log.info("Starting Kafka stream consumer processor on topic '{}'...", topic);
+        topology.addSource("SOURCE", topic)
+                .addProcessor("RavineStreamProcessor", () -> new StreamProcessor(publisher), "SOURCE");
 
-        // all consumed messages are transformed in application events
-        events.foreach((k, v) -> {
-            log.info("Consumed event from topic '{}' having key '{}'", topic, k);
-            eventPublisher.publishEvent(new Event(this, k, v));
-        });
-
-        streams = new KafkaStreams(builder.build(), consumerProperties());
+        streams = new KafkaStreams(topology, consumerProperties(), supplier);
     }
 
     /**
@@ -104,9 +101,10 @@ public class AvroConsumer implements Runnable {
     }
 
     public AvroConsumer(
-            ApplicationEventPublisher eventPublisher, KafkaConfig kafkaConfig, KafkaRouteConfig routeConfig
+            Tracer tracer, ApplicationEventPublisher publisher, KafkaConfig kafkaConfig, KafkaRouteConfig routeConfig
     ) {
-        this.eventPublisher = eventPublisher;
+        this.tracer = tracer;
+        this.publisher = publisher;
         this.kafkaConfig = kafkaConfig;
         this.routeConfig = routeConfig;
 

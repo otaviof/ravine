@@ -1,9 +1,8 @@
-package io.github.otaviof.ravine;
+package io.github.otaviof.ravine.confluent;
 
 import integration.PrepareBackend;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.otaviof.ravine.config.SubjectConfig;
-import io.github.otaviof.ravine.confluent.SchemaRegistry;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;

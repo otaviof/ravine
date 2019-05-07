@@ -2,6 +2,7 @@ package io.github.otaviof.ravine;
 
 import io.github.otaviof.ravine.router.Router;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 /**
  * Define endpoints accepted by this app.
  */
+@EnableAutoConfiguration
 @RestController
 @Slf4j
 public class ApiController {

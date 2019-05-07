@@ -20,7 +20,8 @@ public class PrepareBackend {
         log.info("Waiting for Kafka broker at '{}'", broker);
         await().atMost(60, TimeUnit.SECONDS).until(() -> Utils.isPortOpen(broker));
 
-        Utils.createKafkaTopics(broker, Arrays.asList("kafka_request_topic", "kafka_response_topic"));
+        Utils.createKafkaTopics(broker,
+                Arrays.asList("kafka_request_topic", "kafka_response_topic", "kafka_dump_topic"));
     }
 
     /**

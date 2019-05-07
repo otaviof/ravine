@@ -3,11 +3,12 @@ package io.github.otaviof.ravine.kafka;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.github.otaviof.ravine.config.KafkaConfig;
 import io.github.otaviof.ravine.config.KafkaRouteConfig;
-import io.opentracing.contrib.kafka.TracingProducerInterceptor;
+import io.github.otaviof.ravine.errors.AvroProducerException;
+import io.opentracing.Tracer;
+import io.opentracing.contrib.kafka.TracingKafkaProducer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.errors.TimeoutException;
@@ -15,6 +16,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiFunction;
 
 /**
  * Avro producer representation, handles configuration and send methods.
@@ -22,10 +24,13 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 public
 class AvroProducer {
+    public static final String RAVINE_KEY = "ravine-key";
+
+    private final Tracer tracer;
     private final KafkaConfig kafkaConfig;
     private final KafkaRouteConfig routeConfig;
 
-    private final Producer<String, GenericRecord> producer;
+    private final TracingKafkaProducer<String, GenericRecord> producer;
 
     /**
      * Prepare producer properties.
@@ -49,8 +54,6 @@ class AvroProducer {
         p.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, routeConfig.getTimeoutMs());
         p.put(ProducerConfig.ACKS_CONFIG, routeConfig.getAcks());
 
-        p.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, TracingProducerInterceptor.class.getName());
-
         return p;
     }
 
@@ -64,6 +67,7 @@ class AvroProducer {
     public void send(String k, GenericRecord v) throws AvroProducerException {
         var topic = routeConfig.getTopic();
         var record = new ProducerRecord<>(topic, k, v);
+        record.headers().add(RAVINE_KEY, k.getBytes());
 
         try {
             producer.send(record).get();
@@ -75,11 +79,15 @@ class AvroProducer {
         }
     }
 
-    public AvroProducer(KafkaConfig kafkaConfig, KafkaRouteConfig routeConfig) {
+    public AvroProducer(Tracer tracer, String name, KafkaConfig kafkaConfig, KafkaRouteConfig routeConfig) {
+        this.tracer = tracer;
         this.kafkaConfig = kafkaConfig;
         this.routeConfig = routeConfig;
 
+        BiFunction<String, ProducerRecord, String> spanNameProvider = (operation, record) -> name;
+
         log.info("Creating a producer on topic '{}'", routeConfig.getTopic());
-        this.producer = new KafkaProducer<>(producerProperties());
+        var kafkaProducer = new KafkaProducer<String, GenericRecord>(producerProperties());
+        this.producer = new TracingKafkaProducer<>(kafkaProducer, tracer, spanNameProvider);
     }
 }
