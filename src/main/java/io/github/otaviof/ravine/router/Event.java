@@ -12,7 +12,7 @@ import java.util.Date;
 @Getter
 public class Event extends ApplicationEvent {
     private final String k;
-    private final GenericRecord v;
+    private final transient GenericRecord v;
     private final Date createdAt;
 
     public Event(Object source, String k, GenericRecord v) {

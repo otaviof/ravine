@@ -24,9 +24,8 @@ import java.util.function.BiFunction;
 @Slf4j
 public
 class AvroProducer {
-    public static final String RAVINE_KEY = "ravine-key";
+    static final String RAVINE_KEY = "ravine-key";
 
-    private final Tracer tracer;
     private final KafkaConfig kafkaConfig;
     private final KafkaRouteConfig routeConfig;
 
@@ -80,7 +79,6 @@ class AvroProducer {
     }
 
     public AvroProducer(Tracer tracer, String name, KafkaConfig kafkaConfig, KafkaRouteConfig routeConfig) {
-        this.tracer = tracer;
         this.kafkaConfig = kafkaConfig;
         this.routeConfig = routeConfig;
 

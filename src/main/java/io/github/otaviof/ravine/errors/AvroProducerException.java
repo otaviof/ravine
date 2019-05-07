@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 public
-class AvroProducerException extends Throwable {
+class AvroProducerException extends Exception {
     public AvroProducerException(String message) {
         super(message);
     }
