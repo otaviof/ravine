@@ -166,16 +166,20 @@ documentation.
 
 In order to run tests locally, you need to spin up the necessary backend systems, namely
 [Apache Kafka][kafka] (which depends on [Apache ZooKeeper][zookeeper]), and
-[Confluent Schema-Registry][schemaregistry]. They are wired up using [Docker-Compose](./docker-compose.yaml)
-in a way that Ravine can reach requested backend, and using [`localtest.me`][localtestme] to simulate DNS
-for Kafka-Streams consumers.
+[Confluent Schema-Registry][schemaregistry]. They are wired up using
+[Docker-Compose](./docker-compose.yaml) in a way that Ravine can reach requested backend, and using
+[`localtest.me`][localtestme] to simulate DNS for Kafka-Streams consumers.
 
 The steps required on your laptop are the same needed during CI, so please consider
 [`travis.yml`](./.travis.yml) as documentation.
 
+Source code of this project is formatted using [Google Java Format][googlejavaformat] style, please
+make sure your IDE is prepared to format and clean-up the code in that fashion.
+
 
 
 [bootactuator]: https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready
+[googlejavaformat]: https://github.com/google/google-java-format
 [kafka]: https://kafka.apache.org
 [kafkaproducerdoc]: https://docs.confluent.io/current/installation/configuration/producer-configs.html
 [localtestme]: http://readme.localtest.me

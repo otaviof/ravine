@@ -1,10 +1,9 @@
 package io.github.otaviof.ravine.config;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Schema related configuration, applied on every route entry.

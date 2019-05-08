@@ -1,13 +1,12 @@
 package integration;
 
-import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
-import lombok.extern.slf4j.Slf4j;
+import static org.awaitility.Awaitility.await;
 
+import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-
-import static org.awaitility.Awaitility.await;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PrepareBackend {
@@ -27,7 +26,7 @@ public class PrepareBackend {
     /**
      * Wait for Schema-Registry and when ready, register "person" subject.
      *
-     * @throws IOException         on reading avro definition file;
+     * @throws IOException on reading avro definition file;
      * @throws RestClientException on registering schema;
      */
     public static void waitForSchemaRegistry() throws IOException, RestClientException {
@@ -36,9 +35,9 @@ public class PrepareBackend {
         log.info("Waiting for Schema-Registry at '{}'", schemaRegistryUrl);
         await().atMost(60, TimeUnit.SECONDS).until(() -> Utils.isPortOpen(schemaRegistryUrl));
 
-        Utils.registerSubject(String.format("http://%s", schemaRegistryUrl), "person", "avro/person.avsc");
+        Utils.registerSubject(String.format("http://%s", schemaRegistryUrl), "person",
+                "avro/person.avsc");
     }
-
 
     /**
      * Wait for Kafka and Schema-Registry.

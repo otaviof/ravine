@@ -10,6 +10,10 @@ import org.springframework.context.ApplicationListener;
 class ExternalActorEventListener implements ApplicationListener<Event> {
     private final AvroProducer producer;
 
+    ExternalActorEventListener(AvroProducer producer) {
+        this.producer = producer;
+    }
+
     @Override
     public void onApplicationEvent(Event event) {
         try {
@@ -18,9 +22,5 @@ class ExternalActorEventListener implements ApplicationListener<Event> {
         } catch (AvroProducerException e) {
             e.printStackTrace();
         }
-    }
-
-    ExternalActorEventListener(AvroProducer producer) {
-        this.producer = producer;
     }
 }

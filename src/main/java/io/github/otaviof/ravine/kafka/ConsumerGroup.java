@@ -1,20 +1,19 @@
 package io.github.otaviof.ravine.kafka;
 
+import static org.awaitility.Awaitility.await;
+
 import io.github.otaviof.ravine.config.Config;
 import io.github.otaviof.ravine.config.RouteConfig;
 import io.opentracing.Tracer;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static org.awaitility.Awaitility.await;
+import javax.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.stereotype.Component;
 
 /**
  * Represents all consumers in this application, where messages received by them are funneled into
@@ -25,9 +24,14 @@ import static org.awaitility.Awaitility.await;
 public class ConsumerGroup implements ApplicationEventPublisherAware {
     private final Tracer tracer;
     private final Config config;
-
-    private ApplicationEventPublisher eventPublisher;
     private final Map<AvroConsumer, Thread> consumerThreads;
+    private ApplicationEventPublisher eventPublisher;
+
+    public ConsumerGroup(Tracer tracer, Config config) {
+        this.tracer = tracer;
+        this.config = config;
+        this.consumerThreads = new HashMap<>();
+    }
 
     /**
      * Receive ApplicationEvent publisher instance.
@@ -44,14 +48,20 @@ public class ConsumerGroup implements ApplicationEventPublisherAware {
      */
     @PostConstruct
     public void waitForConsumers() {
-        log.info("Waiting for consumers to be ready (max '{} ms')...", config.getStartup().getTimeoutMs());
-        await().atMost(config.getStartup().getTimeoutMs(), TimeUnit.MILLISECONDS).until(() -> {
+        var timeout = config.getStartup().getTimeoutMs();
+
+        log.info("Waiting for consumers to be ready (max '{} ms')...", timeout);
+
+        await().atMost(timeout, TimeUnit.MILLISECONDS).until(() -> {
             Thread.sleep(config.getStartup().getCheckIntervalMs());
+
             var runningConsumers = consumerThreads.keySet().stream()
                     .filter(AvroConsumer::isRunning)
                     .collect(Collectors.toList());
+
             log.info("Amount of consumers reporting ready: '{}'/'{}'",
                     runningConsumers.size(), consumerThreads.size());
+
             return runningConsumers.size() == consumerThreads.size();
         });
     }
@@ -68,17 +78,12 @@ public class ConsumerGroup implements ApplicationEventPublisherAware {
                 continue;
             }
 
-            var consumer = new AvroConsumer(tracer, eventPublisher, config.getKafka(), route.getResponse());
+            var consumer = new AvroConsumer(
+                    tracer, eventPublisher, config.getKafka(), route.getResponse());
             var thread = new Thread(consumer);
 
             thread.start();
             consumerThreads.put(consumer, thread);
         }
-    }
-
-    public ConsumerGroup(Tracer tracer, Config config) {
-        this.tracer = tracer;
-        this.config = config;
-        this.consumerThreads = new HashMap<>();
     }
 }

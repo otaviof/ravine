@@ -1,9 +1,8 @@
 package io.github.otaviof.ravine.config;
 
+import javax.validation.constraints.Min;
 import lombok.Getter;
 import lombok.Setter;
-
-import javax.validation.constraints.Min;
 
 /**
  * Global settings for startup configuration.

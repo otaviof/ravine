@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication
 @Slf4j
-public class Ravine  {
+public class Ravine {
     public static void main(String[] args) {
         SpringApplication.run(Ravine.class, args);
     }

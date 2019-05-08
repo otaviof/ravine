@@ -1,16 +1,15 @@
 package io.github.otaviof.ravine.config;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.RandomStringUtils;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
-
 /**
- * Represents the Kafka related configuration applied on each route. It works for producer and consumer
- * settings in the same way.
+ * Represents the Kafka related configuration applied on each route. It works for producer and
+ * consumer settings in the same way.
  */
 @Getter
 @Setter

@@ -4,11 +4,10 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.otaviof.ravine.config.SubjectConfig;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.avro.Schema;
-
 import java.io.IOException;
 import java.util.Collections;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.avro.Schema;
 
 /**
  * Represents a Confluent Schema Registry client.
@@ -16,6 +15,17 @@ import java.util.Collections;
 @Slf4j
 public class SchemaRegistry {
     private static SchemaRegistryClient client = null;
+
+    /**
+     * Constructor.
+     *
+     * @param url schema-registry url;
+     */
+    public SchemaRegistry(String url) {
+        if (client == null) {
+            client = new CachedSchemaRegistryClient(url, 10000);
+        }
+    }
 
     /**
      * Get avro schema of subject name;
@@ -36,7 +46,8 @@ public class SchemaRegistry {
      * @throws SchemaRegistryException on parsing and api communication;
      */
     public Schema getSubject(SubjectConfig subject) throws SchemaRegistryException {
-        log.info("Downloading Schema-Registry subject '{}' (v{})", subject.getName(), subject.getVersion());
+        log.info("Downloading Schema-Registry subject '{}' (v{})",
+                subject.getName(), subject.getVersion());
 
         if (!subjectExists(subject.getName())) {
             log.error("Subject '{}' is not found on Schema-Registry", subject.getName());
@@ -55,6 +66,7 @@ public class SchemaRegistry {
      */
     public boolean subjectExists(String subjectName) throws SchemaRegistryException {
         log.info("Checking if '{}' subject exists", subjectName);
+
         try {
             return client.getAllSubjects().contains(subjectName);
         } catch (IOException | RestClientException e) {
@@ -77,14 +89,16 @@ public class SchemaRegistry {
     }
 
     /**
-     * Download a schema using name and version. When version is zero it gets latest version of schema.
+     * Download a schema using name and version. When version is zero it gets latest version of
+     * schema.
      *
      * @param subjectName subject name;
      * @param subjectVersion subject version;
      * @return avro schema;
      * @throws SchemaRegistryException when not possible to reach or parse schemas;
      */
-    private Schema getSchema(String subjectName, int subjectVersion) throws SchemaRegistryException {
+    private Schema getSchema(String subjectName, int subjectVersion)
+            throws SchemaRegistryException {
         try {
             if (subjectVersion == 0) {
                 subjectVersion = latestVersion(subjectName);
@@ -96,17 +110,6 @@ public class SchemaRegistry {
         } catch (RestClientException e) {
             log.error("Error on REST-API communication: '{}'", e.getMessage());
             throw new SchemaRegistryException("Error on REST-API communication");
-        }
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param url schema-registry url;
-     */
-    public SchemaRegistry(String url) {
-        if (client == null) {
-            client = new CachedSchemaRegistryClient(url, 10000);
         }
     }
 }

@@ -7,6 +7,11 @@ import io.github.otaviof.ravine.confluent.SchemaRegistryException;
 import io.github.otaviof.ravine.errors.AvroProducerException;
 import io.github.otaviof.ravine.errors.InvalidPayloadException;
 import io.opentracing.Tracer;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.AvroTypeException;
 import org.apache.avro.Schema;
@@ -16,12 +21,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.EncoderFactory;
 import org.springframework.stereotype.Component;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Group all Kafka producers in a single instance, organizing producers by the path the represent in
@@ -36,6 +35,17 @@ public class ProducerGroup {
     private final Map<String, AvroProducer> producers;
     private final Map<String, Schema> reqSchemas;
     private final SchemaRegistry schemaRegistry;
+
+    public ProducerGroup(Tracer tracer, Config config) throws SchemaRegistryException {
+        this.tracer = tracer;
+        this.config = config;
+        this.schemaRegistry = new SchemaRegistry(config.getKafka().getSchemaRegistryUrl());
+
+        this.reqSchemas = new HashMap<>();
+        this.producers = new HashMap<>();
+
+        bootstrap();
+    }
 
     /**
      * Produce a message in Kafka topic.
@@ -71,18 +81,21 @@ public class ProducerGroup {
         try {
             var dec = DecoderFactory.get().jsonDecoder(schema, input);
             var record = reader.read(null, dec);
+
             writer.write(record, enc);
             enc.flush();
+
             return record;
         } catch (IOException | AvroTypeException e) {
-            log.error("Error on parsing message body: '{}', caused by '{}'", e.getMessage(), e.getCause());
+            log.error("Error on parsing message body: '{}', caused by '{}'",
+                    e.getMessage(), e.getCause());
             throw new InvalidPayloadException(e.getMessage());
         }
     }
 
     /**
-     * Prepare the producer by reaching out to Schema-Registry to obtain Schema, and regular Kafka producer
-     * boilerplate.
+     * Prepare the producer by reaching out to Schema-Registry to obtain Schema, and regular Kafka
+     * producer boilerplate.
      *
      * @throws SchemaRegistryException when issues on Schema-Registry client;
      */
@@ -90,26 +103,15 @@ public class ProducerGroup {
         for (RouteConfig route : config.getRoutes()) {
             var routePath = route.getEndpoint().getPath();
             var subject = route.getSubject();
-            var spanName = String.format("route=%s,subject=%s,version=%d",
-                    routePath, subject.getName(), subject.getVersion());
+            var spanName = String.format("name=%s,route=%s,subject=%s,version=%d",
+                    route.getName(), routePath, subject.getName(), subject.getVersion());
 
             log.info("Kafka producer named '{}' for '{}' route", route.getName(), routePath);
-            producers.put(routePath, new AvroProducer(
-                    tracer, spanName, config.getKafka(), route.getRequest()));
+            producers.put(routePath,
+                    new AvroProducer(tracer, spanName, config.getKafka(), route.getRequest()));
 
             log.info("Registering schema for route...");
             reqSchemas.put(routePath, schemaRegistry.getSubject(subject));
         }
-    }
-
-    public ProducerGroup(Tracer tracer, Config config) throws SchemaRegistryException {
-        this.tracer = tracer;
-        this.config = config;
-        this.schemaRegistry = new SchemaRegistry(config.getKafka().getSchemaRegistryUrl());
-
-        this.reqSchemas = new HashMap<>();
-        this.producers = new HashMap<>();
-
-        bootstrap();
     }
 }

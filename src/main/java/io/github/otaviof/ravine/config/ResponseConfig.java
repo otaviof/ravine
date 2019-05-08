@@ -1,11 +1,10 @@
 package io.github.otaviof.ravine.config;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.http.entity.ContentType;
-
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 
 @Getter
 @Setter

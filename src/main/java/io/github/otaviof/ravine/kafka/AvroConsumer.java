@@ -5,6 +5,7 @@ import io.github.otaviof.ravine.config.KafkaConfig;
 import io.github.otaviof.ravine.config.KafkaRouteConfig;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.kafka.streams.TracingKafkaClientSupplier;
+import java.util.Properties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
@@ -14,11 +15,9 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.springframework.context.ApplicationEventPublisher;
 
-import java.util.Properties;
-
 /**
- * Wrapper around Kafka Streams to create a generic Avro consumer, using Runnable approach. This instance
- * also exposes the stream state and a shutdown approach.
+ * Wrapper around Kafka Streams to create a generic Avro consumer, using Runnable approach. This
+ * instance also exposes the stream state and a shutdown approach.
  */
 @Slf4j
 public class AvroConsumer implements Runnable {
@@ -28,6 +27,19 @@ public class AvroConsumer implements Runnable {
     private final KafkaRouteConfig routeConfig;
 
     private KafkaStreams streams;
+
+    public AvroConsumer(
+            Tracer tracer,
+            ApplicationEventPublisher publisher,
+            KafkaConfig kafkaConfig,
+            KafkaRouteConfig routeConfig) {
+        this.tracer = tracer;
+        this.publisher = publisher;
+        this.kafkaConfig = kafkaConfig;
+        this.routeConfig = routeConfig;
+
+        build();
+    }
 
     /**
      * Start consumer thread.
@@ -52,12 +64,14 @@ public class AvroConsumer implements Runnable {
 
         p.put(StreamsConfig.APPLICATION_ID_CONFIG, routeConfig.getGroupId());
         p.put(StreamsConfig.CLIENT_ID_CONFIG, routeConfig.getClientId());
-        p.put(StreamsConfig.consumerPrefix(ConsumerConfig.GROUP_ID_CONFIG), routeConfig.getGroupId());
+        p.put(StreamsConfig.consumerPrefix(ConsumerConfig.GROUP_ID_CONFIG),
+                routeConfig.getGroupId());
 
         p.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
 
         // mandatory for consumers as well, in order to consumer generic avro
-        p.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, kafkaConfig.getSchemaRegistryUrl());
+        p.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
+                kafkaConfig.getSchemaRegistryUrl());
 
         p.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         p.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, routeConfig.getValueSerde());
@@ -77,8 +91,10 @@ public class AvroConsumer implements Runnable {
         var topic = routeConfig.getTopic();
 
         log.info("Starting Kafka stream consumer processor on topic '{}'...", topic);
-        topology.addSource("SOURCE", topic)
-                .addProcessor("RavineStreamProcessor", () -> new StreamProcessor(publisher), "SOURCE");
+        topology
+                .addSource("SOURCE", topic)
+                .addProcessor("RavineStreamProcessor", () -> new StreamProcessor(publisher),
+                        "SOURCE");
 
         streams = new KafkaStreams(topology, consumerProperties(), supplier);
     }
@@ -98,16 +114,5 @@ public class AvroConsumer implements Runnable {
     public boolean isRunning() {
         log.info("Consumer state on topic '{}': {}", routeConfig.getTopic(), streams.state());
         return streams.state() == KafkaStreams.State.RUNNING;
-    }
-
-    public AvroConsumer(
-            Tracer tracer, ApplicationEventPublisher publisher, KafkaConfig kafkaConfig, KafkaRouteConfig routeConfig
-    ) {
-        this.tracer = tracer;
-        this.publisher = publisher;
-        this.kafkaConfig = kafkaConfig;
-        this.routeConfig = routeConfig;
-
-        build();
     }
 }

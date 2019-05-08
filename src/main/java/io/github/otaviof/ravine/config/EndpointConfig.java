@@ -1,12 +1,11 @@
 package io.github.otaviof.ravine.config;
 
-import lombok.Getter;
-import lombok.Setter;
-
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
 import java.util.Collections;
 import java.util.List;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Represents the configuration for the endpoint attribute, applied on every route entry.

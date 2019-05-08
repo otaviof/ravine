@@ -16,6 +16,10 @@ public class StreamProcessor implements Processor<String, GenericRecord> {
     private final ApplicationEventPublisher publisher;
     private ProcessorContext context;
 
+    StreamProcessor(ApplicationEventPublisher publisher) {
+        this.publisher = publisher;
+    }
+
     /**
      * Receive the message's context.
      *
@@ -59,9 +63,5 @@ public class StreamProcessor implements Processor<String, GenericRecord> {
     @Override
     public void close() {
         // not implemented
-    }
-
-    StreamProcessor(ApplicationEventPublisher publisher) {
-        this.publisher = publisher;
     }
 }

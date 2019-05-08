@@ -1,14 +1,13 @@
 package io.github.otaviof.ravine.router;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
 
 /**
  * Listen to events and store them in a simple cache mechanism.
@@ -17,6 +16,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SpecificEventListener implements ApplicationListener<Event> {
     private final Map<String, Event> cache;
+
+    public SpecificEventListener() {
+        this.cache = new HashMap<>();
+    }
 
     /**
      * Check if a given key is in listener's cache.
@@ -46,9 +49,9 @@ public class SpecificEventListener implements ApplicationListener<Event> {
     void expireOlderThan(int timeoutMs) {
         var expiredAt = new Date(new Date().getTime() - timeoutMs);
         var toDelete = cache.entrySet().stream()
-                .filter(c -> c.getValue().getCreatedAt().before(expiredAt))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toCollection(HashSet::new));
+                        .filter(c -> c.getValue().getCreatedAt().before(expiredAt))
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toCollection(HashSet::new));
 
         log.info("Expiring '{}' entries in cache...", toDelete.size());
         toDelete.forEach(cache::remove);
@@ -67,9 +70,5 @@ public class SpecificEventListener implements ApplicationListener<Event> {
             return;
         }
         cache.put(event.getK(), event);
-    }
-
-    public SpecificEventListener() {
-        this.cache = new HashMap<>();
     }
 }

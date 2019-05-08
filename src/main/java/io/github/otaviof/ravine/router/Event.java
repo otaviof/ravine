@@ -1,10 +1,9 @@
 package io.github.otaviof.ravine.router;
 
+import java.util.Date;
 import lombok.Getter;
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.context.ApplicationEvent;
-
-import java.util.Date;
 
 /**
  * Event to carry on a generic Avro payload, plus metadata.

@@ -2,11 +2,6 @@ package integration;
 
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.avro.Schema;
-import org.apache.kafka.clients.admin.KafkaAdminClient;
-import org.apache.kafka.clients.admin.NewTopic;
-
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
@@ -16,6 +11,10 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.avro.Schema;
+import org.apache.kafka.clients.admin.KafkaAdminClient;
+import org.apache.kafka.clients.admin.NewTopic;
 
 @Slf4j
 class Utils {
@@ -96,9 +95,9 @@ class Utils {
      * Register a subject in Schema-Registry.
      *
      * @param schemaRegistryUrl schema-registry url;
-     * @param subject           subject name;
-     * @param avscPath          path to avro schema definition file;
-     * @throws IOException         when having issues to read file;
+     * @param subject subject name;
+     * @param avscPath path to avro schema definition file;
+     * @throws IOException when having issues to read file;
      * @throws RestClientException on communicating with Schema-Registry;
      */
     static void registerSubject(String schemaRegistryUrl, String subject, String avscPath)
