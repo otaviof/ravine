@@ -12,4 +12,5 @@
 .travis*
 .vscode
 build/
+src/test
 

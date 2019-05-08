@@ -69,6 +69,10 @@ bootJar {
 
 assemble.dependsOn(bootJar)
 
+bootRun {
+    systemProperty('spring.config.location', 'file:./src/main/resources/,file:./src/test/resources/')
+}
+
 release {
     tagTemplate = '${version}'
     versionPropertyFile = 'gradle.properties'

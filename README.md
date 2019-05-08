@@ -15,13 +15,14 @@
 
 # `ravine`
 
-Ravine works as a bridge between synchronous HTTP based workload, and *event-driven* applications 
-landscape. It acts as a bridge holding HTTP requests while it fires a request message in [Kafka][kafka] and 
-wait for a response, therefore other applications can rely in this service to offload HTTP communication,
-while Ravine rely in [Confluent Schema-Registry][schemaregistry] to maintain API contracts.
+Ravine works as a bridge between synchronous HTTP based workload, and *event-driven* applications
+landscape. It acts as a bridge holding HTTP requests while it fires a request message in
+[Kafka][kafka] and wait for a response, therefore other applications can rely in this service to
+offload HTTP communication, while Ravine rely in [Confluent Schema-Registry][schemaregistry] to
+maintain API contracts.
 
-The project goal is empower developers to focus on event-driven eco-systems, and easily plug HTTP endpoints
-against existing Kafka based landscapes.
+The project goal is empower developers to focus on event-driven eco-systems, and easily plug HTTP
+endpoints against existing Kafka based landscapes.
 
 <p align="center">
     <a alt="Basic Ravie workflow" href="https://draw.io/?title=ravine-diag.png&url=https%3A%2F%2Fraw.githubusercontent.com%2Fotaviof%2Fravine%2Fspam%2Fassets%2Fdiagrams%2Fravine-diag.png">
@@ -31,11 +32,11 @@ against existing Kafka based landscapes.
 
 ## Usage
 
-Ravine is based on defining HTTP endpoints and mapping request and response topics. On request topic, it
-will send payload received during HTTP communication, the payload is serialized with configured 
-[Schema-Registry Subject][schemaregistrysubject] version, and dispatched on request topic. Ravine will wait
-for configured timeout, to receive a message in output topic, having the same unique key, where the 
-message value is used as response payload for ongoing HTTP request.
+Ravine is based on defining HTTP endpoints and mapping request and response topics. On request
+topic, it will send payload received during HTTP communication, the payload is serialized with
+configured [Schema-Registry Subject][schemaregistrysubject] version, and dispatched on request
+topic. Ravine will wait for configured timeout, to receive a message in output topic, having the
+same unique key, where the message value is used as response payload for ongoing HTTP request.
 
 The following diagram represents the high level relationship between Ravine and Kafka topics.
 
@@ -48,8 +49,8 @@ The following diagram represents the high level relationship between Ravine and 
 ## Endpoints
 
 Based on configuration you can define endpoints that will be tight up with a given Avro Schema, in 
-Schema-Registry. Therefore Ravine during startup will fetch the *subjects* in specified *versions* to be 
-able to parse payloads and produce messages.
+Schema-Registry. Therefore Ravine during startup will fetch the *subjects* in specified *versions*
+to be able to parse payloads and produce messages.
 
 ### Health
 
@@ -63,14 +64,14 @@ $ curl 127.0.0.1:8080/actuator/health
 
 ## Configuration
 
-Configuration for Ravine is divided in the following sections: `startup`, `kafka` and `routes`. Those 
-sections are covered on the next topics. Please consider
-[`applicaton.yaml`](./src/main/resources/application.yaml) as a concrete example.
+Configuration for Ravine is divided in the following sections: `startup`, `kafka` and `routes`.
+Those sections are covered on the next topics. Please consider
+[`applicaton.yaml`](./src/test/resources/application.yaml) as a concrete example.
 
 ### `ravine.startup`
 
-Startup is covering the application boot, taking care of how long to wait before expose the endpoints. In
-this configuration section you will find:
+Startup is covering the application boot, taking care of how long to wait before expose the
+endpoints. In this configuration section you will find:
 
 - `ravine.startup.timeoutMs`: timeout in milliseconds on waiting for Kafka consumers to report ready;
 - `ravine.startup.checkIntervalMs`: internal in milliseconds to check consumers status;
@@ -84,10 +85,10 @@ Kafka section covers the settings related to the Kafka ecosystem.
 
 ### `ravine.routes`
 
-Routes are the core of Ravine's configuration, here you specify which endpoint routes are exposed by 
-Ravine, and what's the expected data flow path. In this section, you will find the following sub-sections:
-`endpoint`, `subject`, `request` and `response`. Additionally each route has a `name`, a simple 
-identification tag.
+Routes are the core of Ravine's configuration, here you specify which endpoint routes are exposed
+by Ravine, and what's the expected data flow path. In this section, you will find the following
+sub-sections: `endpoint`, `subject`, `request` and `response`. Additionally each route has a `name`,
+a simple identification tag used during tracing.
 
 #### `ravine.routes[n].endpoint`
 
