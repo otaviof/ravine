@@ -8,6 +8,21 @@ logging:
     org.apache.kafka.clients.producer.ProducerConfig: WARN
     io.github.otaviof.ravine: TRACE
 
+management:
+  endpoint:
+    prometheus:
+      enabled:  true
+    metrics:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
 ravine:
   startup:
     timeoutMs: 60000
@@ -28,19 +43,23 @@ ravine:
         valueSerde: io.confluent.kafka.streams.serdes.avro.GenericAvroSerializer
         timeoutMs: 2000
       response:
-        topic: kafka_response_topic
+        # topic: kafka_response_topic
+        topic: kafka_request_topic
         timeoutMs: 5000
     - name: put-endpoint-example
       endpoint:
         path: /v1/group/app/action/put
         methods:
           - put
-        responseCode: 201
-        responseMessage: |
-          { "msg": "record created!" }
+        response:
+          httpCode: 201
+          contentType: application/json
+          body: |
+            { "msg": "record created!" }
       subject:
         name: person
       request:
         topic: kafka_dump_topic
         timeoutMs: 2000
         valueSerde: io.confluent.kafka.streams.serdes.avro.GenericAvroSerializer
+

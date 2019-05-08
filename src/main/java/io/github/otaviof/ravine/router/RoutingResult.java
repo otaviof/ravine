@@ -8,10 +8,12 @@ import lombok.Getter;
 @Getter
 public class RoutingResult {
     private int statusCode;
+    private String contentType;
     private String payload;
 
-    public RoutingResult(int statusCode, String payload) {
+    public RoutingResult(int statusCode, String contentType, String payload) {
         this.statusCode = statusCode;
+        this.contentType = contentType;
         this.payload = payload;
     }
 }

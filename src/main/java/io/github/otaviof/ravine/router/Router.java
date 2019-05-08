@@ -1,6 +1,7 @@
 package io.github.otaviof.ravine.router;
 
 import io.github.otaviof.ravine.config.Config;
+import io.github.otaviof.ravine.config.ResponseConfig;
 import io.github.otaviof.ravine.config.RouteConfig;
 import io.github.otaviof.ravine.errors.AvroProducerException;
 import io.github.otaviof.ravine.errors.MethodNotAllowedOnPathException;
@@ -51,7 +52,7 @@ public class Router {
         log.info("Routing request '{}' for path '{}' ({} bytes)", method, path, body.length);
 
         var routeConfig = prepare(method, path);
-        var endpoint = routeConfig.getEndpoint();
+        var response = routeConfig.getEndpoint().getResponse();
         var uuid = UUID.randomUUID().toString();
 
         try {
@@ -62,11 +63,15 @@ public class Router {
 
         if (routeConfig.getResponse() == null) {
             log.info("Empty response topic, therefore just dispatching event.");
-            return new RoutingResult(endpoint.getResponseCode(), endpoint.getResponseMessage());
+            return new RoutingResult(response.getHttpCode(), response.getContentType(), response.getBody());
         }
 
-        return new RoutingResult(
-                endpoint.getResponseCode(),
+        if (response == null) {
+            response = new ResponseConfig();
+        }
+
+        return new RoutingResult(response.getHttpCode(),
+                response.getContentType(),
                 waitForResponse(path, uuid, routeConfig.getResponse().getTimeoutMs()));
     }
 

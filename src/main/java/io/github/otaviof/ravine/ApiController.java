@@ -33,7 +33,6 @@ public class ApiController {
      */
     @RequestMapping(
             consumes = "application/json",
-            produces = "application/json",
             method = {RequestMethod.POST, RequestMethod.PUT})
     @ResponseBody
     public String handler(
@@ -51,6 +50,7 @@ public class ApiController {
 
         var routingResult = router.route(req.getMethod(), path, bos.toByteArray());
         res.setStatus(routingResult.getStatusCode());
+        res.setContentType(routingResult.getContentType());
 
         return routingResult.getPayload();
     }
