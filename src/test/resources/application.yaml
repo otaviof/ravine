@@ -9,6 +9,8 @@ ravine:
   kafka:
     schemaRegistryUrl: http://schemaregistry.localtest.me:8681
     brokers: kafka.localtest.me:9092
+    properties:
+      retry.backoff.ms: 150
   routes:
     - name: post-endpoint-example
       endpoint:

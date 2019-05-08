@@ -82,6 +82,8 @@ Kafka section covers the settings related to the Kafka ecosystem.
 
 - `ravine.kafka.schemaRegistryUrl`: Confluent Schema-Registry URL;
 - `ravine.kafka.brokers`: comma separated list of Kafka bootstrap brokers;
+- `ravine.kafka.properties`: key-value pairs of Kafka properties applied to all consumers and
+producers;
 
 ### `ravine.routes`
 
@@ -125,6 +127,7 @@ specific route. Third party stream consumers would tap on this topic and react o
 `io.confluent.kafka.streams.serdes.avro.GenericAvroSerde`;
 - `ravine.routes[n].request.timeoutMs`: timeout in milliseconds to produce a message;
 - `ravine.routes[n].request.acks`: Kafka producer [`ack`][kafkaproducerdoc] approach, by default `all`;
+- `ravine.routes[n].request.properties`: kay-value pairs of properties to be informed in producer;
 
 #### `ravine.routes[n].response`
 
@@ -133,6 +136,7 @@ Response defines the Kafka topic on which Ravine wait for a response message for
 - `ravine.routes[n].response.topic`: Kafka topic name;
 - `ravine.routes[n].response.valueSerde`: value serializer class, by default:
 `io.confluent.kafka.serdes.avro.GenericAvroSerde`;
+- `ravine.routes[n].request.properties`: kay-value pairs of properties to be informed in consumer;
 - `ravine.routes[n].response.timeoutMs`: timeout in milliseconds to wait for response message;
 
 ## Instrumentation

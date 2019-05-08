@@ -64,6 +64,9 @@ public class AvroProducer {
         p.put(ProducerConfig.MAX_BLOCK_MS_CONFIG, routeConfig.getTimeoutMs());
         p.put(ProducerConfig.ACKS_CONFIG, routeConfig.getAcks());
 
+        p.putAll(kafkaConfig.getProperties());
+        p.putAll(routeConfig.getProperties());
+
         return p;
     }
 

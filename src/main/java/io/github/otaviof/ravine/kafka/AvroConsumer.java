@@ -78,6 +78,9 @@ public class AvroConsumer implements Runnable {
         p.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         p.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, routeConfig.getValueSerde());
 
+        p.putAll(kafkaConfig.getProperties());
+        p.putAll(routeConfig.getProperties());
+
         return p;
     }
 

@@ -1,5 +1,7 @@
 package io.github.otaviof.ravine.config;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,4 +17,6 @@ public class KafkaConfig {
 
     @NotEmpty
     private String brokers;
+
+    private Map<String, String> properties = new HashMap<>();
 }

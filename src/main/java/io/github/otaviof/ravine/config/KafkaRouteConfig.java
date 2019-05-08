@@ -1,5 +1,7 @@
 package io.github.otaviof.ravine.config;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
@@ -31,4 +33,6 @@ public class KafkaRouteConfig {
 
     @NotEmpty
     private String groupId = String.format("ravine-%s", RandomStringUtils.randomAlphabetic(10));
+
+    private Map<String, String> properties = new HashMap<>();
 }
