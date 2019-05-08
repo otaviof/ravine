@@ -103,8 +103,8 @@ public class ProducerGroup {
         for (RouteConfig route : config.getRoutes()) {
             var routePath = route.getEndpoint().getPath();
             var subject = route.getSubject();
-            var spanName = String.format("name=%s,route=%s,subject=%s,version=%d",
-                    route.getName(), routePath, subject.getName(), subject.getVersion());
+            var spanName = String.format("name=\"%s\", subject=\"%s\", version=\"%d\"",
+                    route.getName(), subject.getName(), subject.getVersion());
 
             log.info("Kafka producer named '{}' for '{}' route", route.getName(), routePath);
             producers.put(routePath,
