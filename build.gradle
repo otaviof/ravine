@@ -45,6 +45,9 @@ dependencies {
     compile("io.opentracing.contrib:opentracing-spring-jaeger-starter:${otSpringJaegerVersion}")
     compile("io.jaegertracing:jaeger-core:${jaegerCoreVersion}")
 
+    compile("io.micrometer:micrometer-registry-prometheus:${micrometerVersion}")
+    compile("io.micrometer:micrometer-core:${micrometerVersion}")
+
     compile("org.springframework.boot:spring-boot-starter-web:${springVersion}",
             "org.springframework.boot:spring-boot-starter-logging:${springVersion}",
             "org.springframework.boot:spring-boot-configuration-processor:${springVersion}",
