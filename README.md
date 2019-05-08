@@ -181,10 +181,22 @@ The steps required on your laptop are the same needed during CI, so please consi
 Source code of this project is formatted using [Google Java Format][googlejavaformat] style, please
 make sure your IDE is prepared to format and clean-up the code in that fashion.
 
+### Releasing
+
+To release new versions, execute the following:
+
+``` bash
+gradlew release
+```
+
+The [release plugin][gradlerelease] will execute a number of steps to release this project, by
+tagging and pushing the code, plus prepating a new version. Some steps are interactive.
+
 
 
 [bootactuator]: https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready
 [googlejavaformat]: https://github.com/google/google-java-format
+[gradlerelease]: https://github.com/researchgate/gradle-release
 [kafka]: https://kafka.apache.org
 [kafkaproducerdoc]: https://docs.confluent.io/current/installation/configuration/producer-configs.html
 [localtestme]: http://readme.localtest.me
