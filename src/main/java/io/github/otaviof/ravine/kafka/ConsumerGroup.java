@@ -11,8 +11,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.boot.actuate.health.CompositeHealthIndicator;
+import org.springframework.boot.actuate.health.HealthAggregator;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.actuate.health.HealthIndicatorRegistry;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,12 +27,19 @@ import org.springframework.stereotype.Component;
  * ApplicationEvents mechanism.
  */
 @Component
+@Configurable
 @Slf4j
 public class ConsumerGroup implements ApplicationEventPublisherAware {
     private final Tracer tracer;
     private final Config config;
     private final Map<AvroConsumer, Thread> consumerThreads;
-    private ApplicationEventPublisher eventPublisher;
+    private ApplicationEventPublisher publisher;
+
+    @Autowired
+    private HealthAggregator healthAggregator;
+
+    @Autowired
+    private HealthIndicatorRegistry healthIndicatorRegistry;
 
     public ConsumerGroup(Tracer tracer, Config config) {
         this.tracer = tracer;
@@ -40,7 +54,7 @@ public class ConsumerGroup implements ApplicationEventPublisherAware {
      */
     @Override
     public void setApplicationEventPublisher(ApplicationEventPublisher eventPublisher) {
-        this.eventPublisher = eventPublisher;
+        this.publisher = eventPublisher;
     }
 
     /**
@@ -78,12 +92,28 @@ public class ConsumerGroup implements ApplicationEventPublisherAware {
                 continue;
             }
 
-            var consumer = new AvroConsumer(
-                    tracer, eventPublisher, config.getKafka(), route.getResponse());
-            var thread = new Thread(consumer);
+            var consumer = new AvroConsumer(tracer, publisher, config.getKafka(),
+                    route.getResponse());
+            var thread = new Thread(new AvroConsumerRunnable(consumer));
 
             thread.start();
             consumerThreads.put(consumer, thread);
         }
+    }
+
+    /**
+     * Aggregate and expose a bean wth health-indicators of all instantiated consumers.
+     *
+     * @return HealthIndicator with all consumer results;
+     */
+    @Bean
+    public HealthIndicator consumersHealthIndicator() {
+        var composite = new CompositeHealthIndicator(healthAggregator, healthIndicatorRegistry);
+
+        for (AvroConsumer c : consumerThreads.keySet()) {
+            healthIndicatorRegistry.register(String.format("kafka-consumer--%s", c.getTopic()), c);
+        }
+
+        return composite;
     }
 }

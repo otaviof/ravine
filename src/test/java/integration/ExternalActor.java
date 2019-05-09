@@ -2,6 +2,7 @@ package integration;
 
 import io.github.otaviof.ravine.config.Config;
 import io.github.otaviof.ravine.kafka.AvroConsumer;
+import io.github.otaviof.ravine.kafka.AvroConsumerRunnable;
 import io.github.otaviof.ravine.kafka.AvroProducer;
 import io.opentracing.Tracer;
 import java.util.UUID;
@@ -35,7 +36,7 @@ class ExternalActor {
 
     void bootstrap() {
         log.info("Starting test-actor consumer thread...");
-        Thread consumerThread = new Thread(this.consumer);
+        Thread consumerThread = new Thread(new AvroConsumerRunnable(this.consumer));
         consumerThread.start();
     }
 }

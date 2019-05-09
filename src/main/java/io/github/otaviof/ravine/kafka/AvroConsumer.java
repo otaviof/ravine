@@ -1,11 +1,15 @@
 package io.github.otaviof.ravine.kafka;
 
+import static org.apache.kafka.streams.KafkaStreams.State.ERROR;
+import static org.apache.kafka.streams.KafkaStreams.State.RUNNING;
+
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.github.otaviof.ravine.config.KafkaConfig;
 import io.github.otaviof.ravine.config.KafkaRouteConfig;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.kafka.streams.TracingKafkaClientSupplier;
 import java.util.Properties;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
@@ -13,6 +17,8 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
+import org.springframework.boot.actuate.health.AbstractHealthIndicator;
+import org.springframework.boot.actuate.health.Health.Builder;
 import org.springframework.context.ApplicationEventPublisher;
 
 /**
@@ -20,12 +26,16 @@ import org.springframework.context.ApplicationEventPublisher;
  * instance also exposes the stream state and a shutdown approach.
  */
 @Slf4j
-public class AvroConsumer implements Runnable {
+public class AvroConsumer extends AbstractHealthIndicator {
     private final Tracer tracer;
     private final ApplicationEventPublisher publisher;
     private final KafkaConfig kafkaConfig;
     private final KafkaRouteConfig routeConfig;
 
+    @Getter
+    private final String topic;
+
+    @Getter
     private KafkaStreams streams;
 
     public AvroConsumer(
@@ -37,17 +47,9 @@ public class AvroConsumer implements Runnable {
         this.publisher = publisher;
         this.kafkaConfig = kafkaConfig;
         this.routeConfig = routeConfig;
+        this.topic = routeConfig.getTopic();
 
         build();
-    }
-
-    /**
-     * Start consumer thread.
-     */
-    @Override
-    public void run() {
-        log.info("Starting consumer...");
-        streams.start();
     }
 
     /**
@@ -91,22 +93,13 @@ public class AvroConsumer implements Runnable {
         var builder = new StreamsBuilder();
         var topology = builder.build();
         var supplier = new TracingKafkaClientSupplier(tracer);
-        var topic = routeConfig.getTopic();
 
         log.info("Starting Kafka stream consumer processor on topic '{}'...", topic);
-        topology
-                .addSource("SOURCE", topic)
+        topology.addSource("SOURCE", topic)
                 .addProcessor("RavineStreamProcessor", () -> new StreamProcessor(publisher),
                         "SOURCE");
 
         streams = new KafkaStreams(topology, consumerProperties(), supplier);
-    }
-
-    /**
-     * Run shutdown procedure on thread.
-     */
-    public void stop() {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> streams.close()));
     }
 
     /**
@@ -115,7 +108,30 @@ public class AvroConsumer implements Runnable {
      * @return boolean;
      */
     public boolean isRunning() {
-        log.info("Consumer state on topic '{}': {}", routeConfig.getTopic(), streams.state());
-        return streams.state() == KafkaStreams.State.RUNNING;
+        log.info("Consumer state on topic '{}': {}", topic, streams.state());
+        return streams.state() == RUNNING;
+    }
+
+    /**
+     * Register consumers health checks into the registry, and show a aggregated status.
+     *
+     * @param builder health builder object;
+     */
+    @Override
+    protected void doHealthCheck(Builder builder) {
+        var state = streams.state();
+
+        if (state == RUNNING) {
+            builder.up();
+            return;
+        }
+        if (state == ERROR) {
+            log.error("Kafka consumer on topic '{}' state: '{}'", topic, state);
+            builder.down();
+            return;
+        }
+
+        log.info("Kafka consumer on topic '{}' state: '{}'", topic, state);
+        builder.unknown();
     }
 }
