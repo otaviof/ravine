@@ -8,6 +8,8 @@ logging:
     org.apache.kafka.clients.producer.ProducerConfig: WARN
 management:
   endpoint:
+    health:
+      show-details: ALWAYS
     prometheus:
       enabled:  true
     metrics:
@@ -16,6 +18,9 @@ management:
     web:
       exposure:
         include: health,prometheus
+  health:
+    defaults:
+      enabled: false
   metrics:
     export:
       prometheus:

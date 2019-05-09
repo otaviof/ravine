@@ -58,9 +58,19 @@ This application is using [Spring Boot Actuator][bootactuator] plugin, therefore
 `/actuator/health` endpoint path, you can probe application functional status.
 
 ```
-$ curl 127.0.0.1:8080/actuator/health
-{"status":"UP"}
+$ curl --silent http://127.0.0.1:8080/actuator/health |jq
+{
+  "status": "UP",
+  "details": {
+    "kafka-consumer--kafka_response_topic": {
+      "status": "UP"
+    }
+  }
+}
 ```
+
+Kafka consumers in use by this application are also subject of main health check endpoint, as the
+example shows.
 
 ## Configuration
 
