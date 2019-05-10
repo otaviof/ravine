@@ -1,24 +1,28 @@
 package io.github.otaviof.ravine.router;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import io.github.otaviof.ravine.config.Config;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 /**
- * Listen to events and store them in a simple cache mechanism.
+ * Listen to events and store them in a cache with time to expire and maximum amount of items.
  */
 @Component
 @Slf4j
 public class EventListener implements ApplicationListener<Event> {
-    private final Map<String, Event> cache;
+    private final Cache<String, Event> cache;
 
-    public EventListener() {
-        this.cache = new HashMap<>();
+    public EventListener(Config config) {
+        log.info("Cached event-listener, expire after '{}' ms and maximum entries '{}'",
+                config.getCache().getExpireMs(), config.getCache().getMaximumSize());
+        this.cache = Caffeine.newBuilder()
+                .expireAfterWrite(config.getCache().getExpireMs(), TimeUnit.MILLISECONDS)
+                .maximumSize(config.getCache().getMaximumSize())
+                .build();
     }
 
     /**
@@ -28,7 +32,7 @@ public class EventListener implements ApplicationListener<Event> {
      * @return boolean;
      */
     boolean inCache(String key) {
-        return cache.keySet().contains(key);
+        return cache.getIfPresent(key) != null;
     }
 
     /**
@@ -38,23 +42,7 @@ public class EventListener implements ApplicationListener<Event> {
      * @return Event object;
      */
     Event getEvent(String key) {
-        return cache.get(key);
-    }
-
-    /**
-     * Given timeout, remove from cache events that are older than that.
-     *
-     * @param timeoutMs timeout in milliseconds;
-     */
-    void expireOlderThan(int timeoutMs) {
-        var expiredAt = new Date(new Date().getTime() - timeoutMs);
-        var toDelete = cache.entrySet().stream()
-                        .filter(c -> c.getValue().getCreatedAt().before(expiredAt))
-                        .map(Map.Entry::getKey)
-                        .collect(Collectors.toCollection(HashSet::new));
-
-        log.info("Expiring '{}' entries in cache...", toDelete.size());
-        toDelete.forEach(cache::remove);
+        return cache.getIfPresent(key);
     }
 
     /**
@@ -64,11 +52,14 @@ public class EventListener implements ApplicationListener<Event> {
      */
     @Override
     public void onApplicationEvent(Event event) {
-        log.info("Received application event key: '{}'", event.getK());
+        log.info("Received application event with key '{}', items in cache '{}'",
+                event.getK(), cache.estimatedSize());
+
         if (inCache(event.getK())) {
-            log.debug("Event key '{}' is already in cache", event.getK());
+            log.warn("Event key '{}' is already in cache, skipping!", event.getK());
             return;
         }
+
         cache.put(event.getK(), event);
     }
 }

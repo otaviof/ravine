@@ -106,8 +106,6 @@ public class Router {
                     .format("No response-event after '%d' ms for path '%s'.", timeout, path);
             log.error(msg);
             throw new RouteTimeoutException(msg);
-        } finally {
-            listener.expireOlderThan(80000);
         }
     }
 

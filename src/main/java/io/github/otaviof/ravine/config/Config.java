@@ -19,10 +19,13 @@ import org.springframework.validation.annotation.Validated;
 @Setter
 public class Config {
     @NotNull
-    private StartUpConfig startup;
+    private StartUpConfig startup = new StartUpConfig();
 
     @NotNull
-    private KafkaConfig kafka;
+    private CacheConfig cache = new CacheConfig();
+
+    @NotNull
+    private KafkaConfig kafka = new KafkaConfig();
 
     @NotEmpty
     private List<RouteConfig> routes;

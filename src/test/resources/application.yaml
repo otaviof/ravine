@@ -6,6 +6,9 @@ ravine:
   startup:
     timeoutMs: 60000
     checkIntervalMs: 1500
+  cache:
+    maximumSize: 2500
+    expireMs: 15000
   kafka:
     schemaRegistryUrl: http://schemaregistry.localtest.me:8681
     brokers: kafka.localtest.me:9092
