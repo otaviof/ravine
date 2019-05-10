@@ -9,7 +9,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class StartUpConfig {
+public class StartupConfig {
     @Min(1)
     int timeoutMs = 45000;
 

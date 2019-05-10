@@ -19,7 +19,7 @@ import org.springframework.validation.annotation.Validated;
 @Setter
 public class Config {
     @NotNull
-    private StartUpConfig startup = new StartUpConfig();
+    private StartupConfig startup = new StartupConfig();
 
     @NotNull
     private CacheConfig cache = new CacheConfig();
