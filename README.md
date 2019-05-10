@@ -84,8 +84,8 @@ example shows.
 
 ## Configuration
 
-Configuration for Ravine is divided in the following sections: `startup`, `kafka` and `routes`.
-Those sections are covered on the next topics. Please consider
+Configuration for Ravine is divided in the following sections: `startup`, `cache`, `kafka` and
+`routes`. Those sections are covered on the next topics. Please consider
 [`applicaton.yaml`](./src/test/resources/application.yaml) as a concrete example.
 
 ### `ravine.startup`
@@ -95,6 +95,14 @@ endpoints. In this configuration section you will find:
 
 - `ravine.startup.timeoutMs`: timeout in milliseconds on waiting for Kafka consumers to report ready;
 - `ravine.startup.checkIntervalMs`: internal in milliseconds to check consumers status;
+
+### `ravine.cache`
+
+A common usage scenario is to fan out *response topic* messages to all Ravine instances, and 
+therefore you want to have tighter control of caching.
+
+- `ravine.cache.maximumSize`: maximum amount of entries in cache;
+- `ravine.cache.expireMs`: expiration time in milliseconds, since the record was written in cache;
 
 ### `ravine.kafka`
 
