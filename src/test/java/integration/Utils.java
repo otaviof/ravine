@@ -1,5 +1,7 @@
 package integration;
 
+import static org.awaitility.Awaitility.await;
+
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import java.io.IOException;
@@ -10,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.Schema;
@@ -19,15 +22,12 @@ import org.apache.kafka.clients.admin.NewTopic;
 @Slf4j
 class Utils {
     /**
-     * Wrapper around thread.sleep without exceptions to handle.
+     * Sleep for a number of milliseconds.
      *
      * @param ms sleep interval in ms;
      */
     private static void sleep(int ms) {
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException ignored) {
-        }
+        await().atLeast(ms, TimeUnit.MILLISECONDS);
     }
 
     /**

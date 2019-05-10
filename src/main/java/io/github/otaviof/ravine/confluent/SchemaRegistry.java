@@ -14,7 +14,7 @@ import org.apache.avro.Schema;
  */
 @Slf4j
 public class SchemaRegistry {
-    private static SchemaRegistryClient client = null;
+    private final SchemaRegistryClient client;
 
     /**
      * Constructor.
@@ -22,9 +22,7 @@ public class SchemaRegistry {
      * @param url schema-registry url;
      */
     public SchemaRegistry(String url) {
-        if (client == null) {
-            client = new CachedSchemaRegistryClient(url, 10000);
-        }
+        this.client = new CachedSchemaRegistryClient(url, 10000);
     }
 
     /**
