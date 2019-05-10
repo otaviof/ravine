@@ -1,1 +1,15 @@
-{ "type": "record", "name": "Person", "namespace": "io.github.otaviof.schema", "fields": [ { "name": "firstName", "type": "string" }, { "name": "lastName", "type": "string" } ] }
+{
+  "type": "record",
+  "name": "Person",
+  "namespace": "io.github.otaviof.schema",
+  "fields": [
+    {
+      "name": "firstName",
+      "type": "string"
+    },
+    {
+      "name": "lastName",
+      "type": "string"
+    }
+  ]
+}

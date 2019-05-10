@@ -52,13 +52,16 @@ public class ProducerGroup {
      *
      * @param path on behalf of path, used to search configuration;
      * @param key record key;
-     * @param payload future record payload;
+     * @param headers kafka record headers;
+     * @param value future record payload;
      * @throws AvroProducerException on having errors to serialize;
      */
-    public void send(String path, String key, byte[] payload) throws AvroProducerException {
-        var record = convertToAvro(payload, reqSchemas.get(path));
+    public void send(String path, String key, byte[] value, Map<String, String> headers) throws
+            AvroProducerException {
+        var record = convertToAvro(value, reqSchemas.get(path));
+
         log.info("Producing message with key '{}' for path '{}'", key, path);
-        producers.get(path).send(key, record);
+        producers.get(path).send(key, record, headers);
     }
 
     /**

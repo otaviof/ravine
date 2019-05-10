@@ -27,12 +27,12 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class Router {
     private final Config config;
-    private final SpecificEventListener listener;
+    private final EventListener listener;
     private final ProducerGroup producerGroup;
 
     public Router(
             Config config,
-            SpecificEventListener listener,
+            EventListener listener,
             ConsumerGroup consumerGroup,
             ProducerGroup producerGroup) {
         this.config = config;
@@ -48,44 +48,41 @@ public class Router {
      * Handle a given route, by producing the payload on Kafka, given it's a valid Avro payload, and
      * wait for message to arrive on output topic, or timeout.
      *
-     * @param method request method;
-     * @param path request path;
-     * @param body request body;
+     * @param request ravine request;
      * @return RouteConfig with event content and status-code;
      * @throws RouteNotFoundException on not being able to route based on path;
      * @throws MethodNotAllowedOnPathException http request method is not configured on path;
      * @throws ProducerErrorException error on producing a message;
      * @throws RouteTimeoutException timeout on waiting for response;
      */
-    public RoutingResult route(String method, String path, byte[] body)
-            throws RouteNotFoundException, MethodNotAllowedOnPathException, ProducerErrorException,
+    public Response route(Request request) throws
+            RouteNotFoundException,
+            MethodNotAllowedOnPathException,
+            ProducerErrorException,
             RouteTimeoutException {
-        log.info("Routing request '{}' for path '{}' ({} bytes)", method, path, body.length);
-
-        var routeConfig = prepare(method, path);
-        var response = routeConfig.getEndpoint().getResponse();
+        var routeConfig = prepare(request.getMethod(), request.getPath());
+        var responseConfig = routeConfig.getEndpoint().getResponse() != null ?
+                routeConfig.getEndpoint().getResponse() : new ResponseConfig();
         var uuid = UUID.randomUUID().toString();
 
+        log.info("Routing request '{}' for path '{}' ({} bytes)",
+                request.getMethod(), request.getPath(), request.getBody().length);
+
         try {
-            producerGroup.send(path, uuid, body);
+            producerGroup.send(request.getPath(), uuid, request.getBody(), request.getHeaders());
         } catch (AvroProducerException e) {
             throw new ProducerErrorException(e.getMessage());
         }
 
         if (routeConfig.getResponse() == null) {
             log.info("Empty response topic, therefore just dispatching event.");
-            return new RoutingResult(
-                    response.getHttpCode(), response.getContentType(), response.getBody());
+            return new Response(responseConfig);
         }
 
-        if (response == null) {
-            response = new ResponseConfig();
-        }
-
-        return new RoutingResult(
-                response.getHttpCode(),
-                response.getContentType(),
-                waitForResponse(path, uuid, routeConfig.getResponse().getTimeoutMs()));
+        return new Response(
+                responseConfig.getHttpCode(),
+                responseConfig.getContentType(),
+                waitForResponse(request.getPath(), uuid, routeConfig.getResponse().getTimeoutMs()));
     }
 
     /**
@@ -133,8 +130,7 @@ public class Router {
                     String.format("route for path '%s' is not found", path));
         }
 
-        var allowedMethods =
-                routeConfig.getEndpoint().getMethods().stream()
+        var allowedMethods = routeConfig.getEndpoint().getMethods().stream()
                         .map(String::toLowerCase)
                         .collect(Collectors.toList());
 

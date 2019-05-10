@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
-public class SpecificEventListener implements ApplicationListener<Event> {
+public class EventListener implements ApplicationListener<Event> {
     private final Map<String, Event> cache;
 
-    public SpecificEventListener() {
+    public EventListener() {
         this.cache = new HashMap<>();
     }
 

@@ -6,6 +6,7 @@ import io.github.otaviof.ravine.config.KafkaRouteConfig;
 import io.github.otaviof.ravine.errors.AvroProducerException;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.kafka.TracingKafkaProducer;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
@@ -75,13 +76,19 @@ public class AvroProducer {
      *
      * @param k key;
      * @param v value;
+     * @param headers additional kafka record headers;
      * @throws AvroProducerException on producing exceptions;
      */
-    public void send(String k, GenericRecord v) throws AvroProducerException {
+    public void send(String k, GenericRecord v, Map<String, String> headers) throws
+            AvroProducerException {
         var topic = routeConfig.getTopic();
         var record = new ProducerRecord<>(topic, k, v);
 
         record.headers().add(RAVINE_KEY, k.getBytes());
+        headers.forEach((headerKey, headerValue) -> {
+            log.debug("Kafka record header: '{}'='{}'", headerKey, headerValue);
+            record.headers().add(headerKey, headerValue.getBytes());
+        });
 
         try {
             producer.send(record).get();

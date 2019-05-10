@@ -3,6 +3,7 @@ package integration;
 import io.github.otaviof.ravine.errors.AvroProducerException;
 import io.github.otaviof.ravine.kafka.AvroProducer;
 import io.github.otaviof.ravine.router.Event;
+import java.util.HashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 
@@ -18,7 +19,7 @@ class ExternalActorEventListener implements ApplicationListener<Event> {
     public void onApplicationEvent(Event event) {
         try {
             log.info("[TEST] event received, key: '{}', value: '{}'", event.getK(), event.getV());
-            this.producer.send(event.getK(), event.getV());
+            this.producer.send(event.getK(), event.getV(), new HashMap<>());
         } catch (AvroProducerException e) {
             e.printStackTrace();
         }

@@ -32,11 +32,16 @@ endpoints against existing Kafka based landscapes.
 
 ## Usage
 
-Ravine is based on defining HTTP endpoints and mapping request and response topics. On request
-topic, it will send payload received during HTTP communication, the payload is serialized with
-configured [Schema-Registry Subject][schemaregistrysubject] version, and dispatched on request
-topic. Ravine will wait for configured timeout, to receive a message in output topic, having the
-same unique key, where the message value is used as response payload for ongoing HTTP request.
+Ravine is based on defining HTTP endpoints and mapping request and response topics. On *request
+topic*, it will send payload received during HTTP communication, the payload is serialized with
+configured [Schema-Registry Subject][schemaregistrysubject] version, and dispatched on *request
+topic*. Ravine will wait for configured timeout, to eventually receive a message in *response
+topic*, having the same unique key, where the message value is used as response payload for ongoing
+HTTP request.
+
+Furthermore, to identify the response event, Ravine will inspect Kafka message header in order to
+find unique-ID in there. Therefore, you can conserve the original headers in order to respond events
+back to Ravine.
 
 The following diagram represents the high level relationship between Ravine and Kafka topics.
 
@@ -45,6 +50,11 @@ The following diagram represents the high level relationship between Ravine and 
         <img alt="Ravine using Kafka topics workflow" src="https://raw.githubusercontent.com/otaviof/ravine/master/assets/diagrams/ravine-topics-diag.png"/>
     </a>
 </p>
+
+Regarding HTTP request parameters and headers, those are forwarded in the request event as Kafka
+headers. To identify request parameters consider the header named `ravine-request-parameter-names`,
+and regarding HTTP request headers, consider then `ravine-request-header-names`, where the actual
+value of those variable names are actual header entries.
 
 ## Endpoints
 
