@@ -1,4 +1,4 @@
-package integration;
+package io.github.otaviof.ravine.integration;
 
 import io.github.otaviof.ravine.config.Config;
 import io.github.otaviof.ravine.kafka.AvroConsumer;

@@ -1,4 +1,4 @@
-package integration;
+package io.github.otaviof.ravine.integration;
 
 import static org.awaitility.Awaitility.await;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,7 +34,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Slf4j
-public class RavineTest {
+public class RavineIntegrationTest {
     private static final String PERSON_PAYLOAD = "{ \"firstName\": \"ravine\", \"lastName\": \"test\" }";
 
     @Autowired

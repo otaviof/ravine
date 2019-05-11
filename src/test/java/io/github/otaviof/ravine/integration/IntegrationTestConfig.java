@@ -1,4 +1,4 @@
-package integration;
+package io.github.otaviof.ravine.integration;
 
 import io.github.otaviof.ravine.Ravine;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

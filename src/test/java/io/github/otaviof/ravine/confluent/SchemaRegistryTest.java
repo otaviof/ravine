@@ -3,9 +3,9 @@ package io.github.otaviof.ravine.confluent;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import integration.PrepareBackend;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
 import io.github.otaviof.ravine.config.SubjectConfig;
+import io.github.otaviof.ravine.integration.PrepareBackend;
 import java.io.IOException;
 import org.junit.Before;
 import org.junit.BeforeClass;

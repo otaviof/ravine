@@ -1,4 +1,4 @@
-package integration;
+package io.github.otaviof.ravine.integration;
 
 import static org.awaitility.Awaitility.await;
 

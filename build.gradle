@@ -96,13 +96,13 @@ tasks.withType(Test) {
 
 task verify(type: Test, dependsOn: testClasses) {
     filter {
-        includeTestsMatching("io.github.otaviof.ravine.*")
+        excludeTestsMatching("io.github.otaviof.ravine.integration.*")
     }
 }
 
 task integration(type: Test, dependsOn: testClasses) {
     filter {
-        includeTestsMatching("integration.*")
+        includeTestsMatching("io.github.otaviof.ravine.integration.*")
     }
 }
 
