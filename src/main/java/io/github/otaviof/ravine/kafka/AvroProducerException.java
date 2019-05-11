@@ -1,4 +1,4 @@
-package io.github.otaviof.ravine.errors;
+package io.github.otaviof.ravine.kafka;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

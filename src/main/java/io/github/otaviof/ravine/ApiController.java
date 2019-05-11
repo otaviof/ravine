@@ -1,11 +1,12 @@
 package io.github.otaviof.ravine;
 
-import io.github.otaviof.ravine.errors.MethodNotAllowedOnPathException;
-import io.github.otaviof.ravine.errors.ProducerErrorException;
-import io.github.otaviof.ravine.errors.RouteNotFoundException;
-import io.github.otaviof.ravine.errors.RouteTimeoutException;
+import io.github.otaviof.ravine.kafka.AvroProducerException;
+import io.github.otaviof.ravine.kafka.ProducerGroupAvroConversionException;
 import io.github.otaviof.ravine.router.Request;
 import io.github.otaviof.ravine.router.Router;
+import io.github.otaviof.ravine.router.RouterRouteMethodNotAllowedException;
+import io.github.otaviof.ravine.router.RouterRouteNotFoundException;
+import io.github.otaviof.ravine.router.RouterRouteTimeoutException;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,10 +39,10 @@ public class ApiController {
      * @param body request body as array of bytes;
      * @return response entity based in a generic avro record;
      * @throws IOException on copying body buffer;
-     * @throws RouteNotFoundException on not being able to route based on path;
-     * @throws MethodNotAllowedOnPathException http request method is not configured on path;
-     * @throws ProducerErrorException error on producing a message;
-     * @throws RouteTimeoutException timeout on waiting for response;
+     * @throws RouterRouteNotFoundException on not being able to route based on path;
+     * @throws RouterRouteMethodNotAllowedException http request method is not configured on path;
+     * @throws AvroProducerException error on producing a message;
+     * @throws RouterRouteTimeoutException timeout on waiting for response;
      */
     @RequestMapping(
             consumes = "application/json",
@@ -50,10 +51,11 @@ public class ApiController {
     public String handler(HttpServletRequest req, @RequestBody byte[] body, HttpServletResponse res)
             throws
             IOException,
-            MethodNotAllowedOnPathException,
-            ProducerErrorException,
-            RouteNotFoundException,
-            RouteTimeoutException {
+            RouterRouteMethodNotAllowedException,
+            AvroProducerException,
+            RouterRouteNotFoundException,
+            RouterRouteTimeoutException,
+            ProducerGroupAvroConversionException {
         var request = new Request(req, body);
 
         log.info("Handling request for '{}' path, '{}' bytes", request.getPath(),

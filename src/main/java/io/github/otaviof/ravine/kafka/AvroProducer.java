@@ -3,7 +3,6 @@ package io.github.otaviof.ravine.kafka;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.github.otaviof.ravine.config.KafkaConfig;
 import io.github.otaviof.ravine.config.KafkaRouteConfig;
-import io.github.otaviof.ravine.errors.AvroProducerException;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.kafka.TracingKafkaProducer;
 import java.util.Map;

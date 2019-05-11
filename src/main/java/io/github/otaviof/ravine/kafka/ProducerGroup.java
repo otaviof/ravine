@@ -4,8 +4,6 @@ import io.github.otaviof.ravine.config.Config;
 import io.github.otaviof.ravine.config.RouteConfig;
 import io.github.otaviof.ravine.confluent.SchemaRegistry;
 import io.github.otaviof.ravine.confluent.SchemaRegistryException;
-import io.github.otaviof.ravine.errors.AvroProducerException;
-import io.github.otaviof.ravine.errors.InvalidPayloadException;
 import io.opentracing.Tracer;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -57,7 +55,7 @@ public class ProducerGroup {
      * @throws AvroProducerException on having errors to serialize;
      */
     public void send(String path, String key, byte[] value, Map<String, String> headers) throws
-            AvroProducerException {
+            AvroProducerException, ProducerGroupAvroConversionException {
         var record = convertToAvro(value, reqSchemas.get(path));
 
         log.info("Producing message with key '{}' for path '{}'", key, path);
@@ -71,7 +69,8 @@ public class ProducerGroup {
      * @param schema Avro schema;
      * @return GenericRecord representation;
      */
-    private GenericRecord convertToAvro(byte[] payload, Schema schema) {
+    private GenericRecord convertToAvro(byte[] payload, Schema schema) throws
+            ProducerGroupAvroConversionException {
         var input = new ByteArrayInputStream(payload);
         var output = new ByteArrayOutputStream();
         var enc = EncoderFactory.get().binaryEncoder(output, null);
@@ -92,7 +91,7 @@ public class ProducerGroup {
         } catch (IOException | AvroTypeException e) {
             log.error("Error on parsing message body: '{}', caused by '{}'",
                     e.getMessage(), e.getCause());
-            throw new InvalidPayloadException(e.getMessage());
+            throw new ProducerGroupAvroConversionException(e.getMessage());
         }
     }
 

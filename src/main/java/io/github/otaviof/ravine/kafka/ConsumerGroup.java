@@ -50,11 +50,11 @@ public class ConsumerGroup implements ApplicationEventPublisherAware {
     /**
      * Receive ApplicationEvent publisher instance.
      *
-     * @param eventPublisher publisher instance;
+     * @param publisher event publisher instance;
      */
     @Override
-    public void setApplicationEventPublisher(ApplicationEventPublisher eventPublisher) {
-        this.publisher = eventPublisher;
+    public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
+        this.publisher = publisher;
     }
 
     /**

@@ -31,7 +31,7 @@ public class EventListener implements ApplicationListener<Event> {
      * @param key string key name;
      * @return boolean;
      */
-    boolean inCache(String key) {
+    public boolean inCache(String key) {
         return cache.getIfPresent(key) != null;
     }
 

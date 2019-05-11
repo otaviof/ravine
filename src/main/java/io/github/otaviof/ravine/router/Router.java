@@ -5,13 +5,10 @@ import static org.awaitility.Awaitility.await;
 import io.github.otaviof.ravine.config.Config;
 import io.github.otaviof.ravine.config.ResponseConfig;
 import io.github.otaviof.ravine.config.RouteConfig;
-import io.github.otaviof.ravine.errors.AvroProducerException;
-import io.github.otaviof.ravine.errors.MethodNotAllowedOnPathException;
-import io.github.otaviof.ravine.errors.ProducerErrorException;
-import io.github.otaviof.ravine.errors.RouteNotFoundException;
-import io.github.otaviof.ravine.errors.RouteTimeoutException;
+import io.github.otaviof.ravine.kafka.AvroProducerException;
 import io.github.otaviof.ravine.kafka.ConsumerGroup;
 import io.github.otaviof.ravine.kafka.ProducerGroup;
+import io.github.otaviof.ravine.kafka.ProducerGroupAvroConversionException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -50,16 +47,17 @@ public class Router {
      *
      * @param request ravine request;
      * @return RouteConfig with event content and status-code;
-     * @throws RouteNotFoundException on not being able to route based on path;
-     * @throws MethodNotAllowedOnPathException http request method is not configured on path;
-     * @throws ProducerErrorException error on producing a message;
-     * @throws RouteTimeoutException timeout on waiting for response;
+     * @throws RouterRouteNotFoundException on not being able to route based on path;
+     * @throws RouterRouteMethodNotAllowedException http request method is not configured on path;
+     * @throws AvroProducerException error on producing a message;
+     * @throws RouterRouteTimeoutException timeout on waiting for response;
      */
     public Response route(Request request) throws
-            RouteNotFoundException,
-            MethodNotAllowedOnPathException,
-            ProducerErrorException,
-            RouteTimeoutException {
+            RouterRouteNotFoundException,
+            RouterRouteMethodNotAllowedException,
+            AvroProducerException,
+            RouterRouteTimeoutException,
+            ProducerGroupAvroConversionException {
         var routeConfig = prepare(request.getMethod(), request.getPath());
         var responseConfig = routeConfig.getEndpoint().getResponse() != null ?
                 routeConfig.getEndpoint().getResponse() : new ResponseConfig();
@@ -68,11 +66,7 @@ public class Router {
         log.info("Routing request '{}' for path '{}' ({} bytes)",
                 request.getMethod(), request.getPath(), request.getBody().length);
 
-        try {
-            producerGroup.send(request.getPath(), uuid, request.getBody(), request.getHeaders());
-        } catch (AvroProducerException e) {
-            throw new ProducerErrorException(e.getMessage());
-        }
+        producerGroup.send(request.getPath(), uuid, request.getBody(), request.getHeaders());
 
         if (routeConfig.getResponse() == null) {
             log.info("Empty response topic, therefore just dispatching event.");
@@ -92,10 +86,10 @@ public class Router {
      * @param uuid event key;
      * @param timeout ms to wait;
      * @return String with event content;
-     * @throws RouteTimeoutException on timeout;
+     * @throws RouterRouteTimeoutException on timeout;
      */
-    private String waitForResponse(String path, String uuid, int timeout)
-            throws RouteTimeoutException {
+    private String waitForResponse(String path, String uuid, int timeout) throws
+            RouterRouteTimeoutException {
         log.info("Waiting for '{}' ms for UUID '{}' to come back...", timeout, uuid);
 
         try {
@@ -105,7 +99,7 @@ public class Router {
             var msg = String
                     .format("No response-event after '%d' ms for path '%s'.", timeout, path);
             log.error(msg);
-            throw new RouteTimeoutException(msg);
+            throw new RouterRouteTimeoutException(msg);
         }
     }
 
@@ -115,16 +109,16 @@ public class Router {
      * @param method http request method;
      * @param path route path;
      * @return RouteConfig for path;
-     * @throws RouteNotFoundException on not being able to route based on path;
-     * @throws MethodNotAllowedOnPathException when not part of route config;
+     * @throws RouterRouteNotFoundException on not being able to route based on path;
+     * @throws RouterRouteMethodNotAllowedException when not part of route config;
      */
     private RouteConfig prepare(String method, String path)
-            throws MethodNotAllowedOnPathException, RouteNotFoundException {
+            throws RouterRouteMethodNotAllowedException, RouterRouteNotFoundException {
         var routeConfig = config.getRouteByPath(path);
 
         if (path == null || path.isEmpty() || routeConfig == null) {
             log.warn("Path '{}' is not found!", path);
-            throw new RouteNotFoundException(
+            throw new RouterRouteNotFoundException(
                     String.format("route for path '%s' is not found", path));
         }
 
@@ -133,7 +127,7 @@ public class Router {
                         .collect(Collectors.toList());
 
         if (!allowedMethods.contains(method.toLowerCase())) {
-            throw new MethodNotAllowedOnPathException(
+            throw new RouterRouteMethodNotAllowedException(
                     String.format("method '%s' is not allowed on path '%s'", method, path));
         }
 
