@@ -17,7 +17,6 @@ public class RouteConfig {
     @NotNull
     private EndpointConfig endpoint;
 
-    @NotNull
     private SubjectConfig subject;
 
     @NotNull

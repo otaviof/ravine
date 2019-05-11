@@ -3,10 +3,11 @@ package io.github.otaviof.ravine.kafka;
 import static org.awaitility.Awaitility.await;
 
 import io.github.otaviof.ravine.config.Config;
-import io.github.otaviof.ravine.config.RouteConfig;
+import io.github.otaviof.ravine.config.KafkaRouteConfig;
 import io.opentracing.Tracer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
@@ -81,19 +82,58 @@ public class ConsumerGroup implements ApplicationEventPublisherAware {
     }
 
     /**
-     * Instantiate threads for Kafka streams consumers.
+     * Plan which topics should be consumed, create a map based on  getResponseKafkaRouteConfigs,
+     * but applies simple deduplication to not consume from the same topic at once.
+     *
+     * @return map based on getResponseKafkaRouteConfigs;
+     * @throws ConsumerGroupException on having two topics with different serialization settings;
      */
-    public void bootstrap() {
-        for (RouteConfig route : config.getRoutes()) {
-            log.info("Creating consumer for route named '{}'", route.getName());
+    private Map<String, KafkaRouteConfig> plan() throws ConsumerGroupException {
+        var toConsumeConfigs = new HashMap<String, KafkaRouteConfig>();
 
-            if (route.getResponse() == null) {
-                log.info("Skipping consumer on route!");
+        for (Entry<String, KafkaRouteConfig> entry : config.getResponseKafkaRouteConfigs()
+                .entrySet()) {
+            var topic = entry.getValue().getTopic();
+            var serde = entry.getValue().getValueSerde();
+
+            for (KafkaRouteConfig cfg : toConsumeConfigs.values()) {
+                if (cfg.getTopic().equals(topic) && !cfg.getValueSerde().equals(serde)) {
+                    var msg = String.format(
+                            "Topic '%s' was defined with different serializers: '%s' vs. '%s'!",
+                            topic, serde, cfg.getValueSerde());
+                    throw new ConsumerGroupException(msg);
+                }
+            }
+
+            toConsumeConfigs.put(entry.getKey(), entry.getValue());
+        }
+
+        return toConsumeConfigs;
+    }
+
+    /**
+     * Bootstrap consumers threads, based on plan.
+     *
+     * @throws ConsumerGroupException on having two topics with different serialization settings;
+     */
+    public void bootstrap() throws ConsumerGroupException {
+        for (Entry<String, KafkaRouteConfig> entry : plan().entrySet()) {
+            var name = entry.getKey();
+            var cfg = entry.getValue();
+
+            log.info("Creating consumer for '{}', on topic '{}'", name, cfg.getTopic());
+
+            var exists = consumerThreads.keySet().stream()
+                    .filter(c -> c.getTopic().equals(cfg.getTopic()))
+                    .findAny()
+                    .orElse(null);
+
+            if (exists != null) {
+                log.info("Skipping topic '{}' is being consumed already!", cfg.getTopic());
                 continue;
             }
 
-            var consumer = new AvroConsumer(tracer, publisher, config.getKafka(),
-                    route.getResponse());
+            var consumer = new AvroConsumer(tracer, publisher, config.getKafka(), cfg);
             var thread = new Thread(new AvroConsumerRunnable(consumer));
 
             thread.start();
