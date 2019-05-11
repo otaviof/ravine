@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,6 +32,20 @@ public class ApiController {
         this.router = router;
     }
 
+    @GetMapping
+    public String emptyBodyHandler(HttpServletRequest req, HttpServletResponse res) throws
+            RouterRouteNotFoundException,
+            RouterRouteTimeoutException,
+            AvroProducerException,
+            ProducerGroupAvroConversionException,
+            RouterRouteMethodNotAllowedException {
+        var request = new Request(req);
+
+        log.info("Handling request for '{}' path, empty body.", request.getPath());
+
+        return routeRequest(request, res);
+    }
+
     /**
      * Accept all POST requests send to Ravine, entry point to route a payload via Kafka and wait
      * for response to arrive.
@@ -43,13 +58,15 @@ public class ApiController {
      * @throws RouterRouteMethodNotAllowedException http request method is not configured on path;
      * @throws AvroProducerException error on producing a message;
      * @throws RouterRouteTimeoutException timeout on waiting for response;
+     * @throws ProducerGroupAvroConversionException on converting payload to Avro;
      */
     @RequestMapping(
             consumes = "application/json",
             method = {RequestMethod.POST, RequestMethod.PUT})
     @ResponseBody
-    public String handler(HttpServletRequest req, @RequestBody byte[] body, HttpServletResponse res)
-            throws
+    public String handler(
+            HttpServletRequest req, @RequestBody byte[] body, HttpServletResponse res
+    ) throws
             IOException,
             RouterRouteMethodNotAllowedException,
             AvroProducerException,
@@ -61,6 +78,15 @@ public class ApiController {
         log.info("Handling request for '{}' path, '{}' bytes", request.getPath(),
                 request.getBody().length);
 
+        return routeRequest(request, res);
+    }
+
+    private String routeRequest(Request request, HttpServletResponse res) throws
+            RouterRouteNotFoundException,
+            RouterRouteTimeoutException,
+            AvroProducerException,
+            ProducerGroupAvroConversionException,
+            RouterRouteMethodNotAllowedException {
         var routingResult = router.route(request);
         res.setStatus(routingResult.getStatusCode());
         res.setContentType(routingResult.getContentType());

@@ -26,6 +26,25 @@ public class Request {
     private final byte[] body;
     private final Map<String, String> headers;
 
+    /**
+     * Constructor. Creates a new Request with empty body.
+     *
+     * @param req servlet request;
+     */
+    public Request(HttpServletRequest req) {
+        this.method = req.getMethod();
+        this.path = req.getRequestURI().substring(req.getContextPath().length());
+        this.headers = extractHeaders(req);
+        this.body = "{}".getBytes();
+    }
+
+    /**
+     * Constructor. Creates a new Request instance dealing with the body as well.
+     *
+     * @param req servlet request;
+     * @param body body bytes;
+     * @throws IOException on dealing with byte copy;
+     */
     public Request(HttpServletRequest req, byte[] body) throws IOException {
         this.method = req.getMethod();
         this.path = req.getRequestURI().substring(req.getContextPath().length());

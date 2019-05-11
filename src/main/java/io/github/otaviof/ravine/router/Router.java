@@ -7,6 +7,7 @@ import io.github.otaviof.ravine.config.ResponseConfig;
 import io.github.otaviof.ravine.config.RouteConfig;
 import io.github.otaviof.ravine.kafka.AvroProducerException;
 import io.github.otaviof.ravine.kafka.ConsumerGroup;
+import io.github.otaviof.ravine.kafka.ConsumerGroupException;
 import io.github.otaviof.ravine.kafka.ProducerGroup;
 import io.github.otaviof.ravine.kafka.ProducerGroupAvroConversionException;
 import java.util.UUID;
@@ -31,7 +32,7 @@ public class Router {
             Config config,
             EventListener listener,
             ConsumerGroup consumerGroup,
-            ProducerGroup producerGroup) {
+            ProducerGroup producerGroup) throws ConsumerGroupException {
         this.config = config;
         this.listener = listener;
 
@@ -112,8 +113,9 @@ public class Router {
      * @throws RouterRouteNotFoundException on not being able to route based on path;
      * @throws RouterRouteMethodNotAllowedException when not part of route config;
      */
-    private RouteConfig prepare(String method, String path)
-            throws RouterRouteMethodNotAllowedException, RouterRouteNotFoundException {
+    private RouteConfig prepare(String method, String path) throws
+            RouterRouteMethodNotAllowedException,
+            RouterRouteNotFoundException {
         var routeConfig = config.getRouteByPath(path);
 
         if (path == null || path.isEmpty() || routeConfig == null) {

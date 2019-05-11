@@ -2,11 +2,13 @@ package io.github.otaviof.ravine.kafka;
 
 import io.github.otaviof.ravine.config.Config;
 import io.github.otaviof.ravine.config.RouteConfig;
+import io.github.otaviof.ravine.config.SubjectConfig;
 import io.github.otaviof.ravine.confluent.SchemaRegistry;
 import io.github.otaviof.ravine.confluent.SchemaRegistryException;
 import io.opentracing.Tracer;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +36,8 @@ public class ProducerGroup {
     private final Map<String, Schema> reqSchemas;
     private final SchemaRegistry schemaRegistry;
 
-    public ProducerGroup(Tracer tracer, Config config) throws SchemaRegistryException {
+    public ProducerGroup(Tracer tracer, Config config) throws
+            SchemaRegistryException, IOException, ProducerGroupException {
         this.tracer = tracer;
         this.config = config;
         this.schemaRegistry = new SchemaRegistry(config.getKafka().getSchemaRegistryUrl());
@@ -59,6 +62,7 @@ public class ProducerGroup {
         var record = convertToAvro(value, reqSchemas.get(path));
 
         log.info("Producing message with key '{}' for path '{}'", key, path);
+
         producers.get(path).send(key, record, headers);
     }
 
@@ -95,25 +99,52 @@ public class ProducerGroup {
         }
     }
 
+    private Schema getEmptyRecordSchema() throws IOException, ProducerGroupException {
+        var classLoader = getClass().getClassLoader();
+        var schemaFile = "avro/RavineEmptyRecord.avsc";
+        var resource = classLoader.getResource(schemaFile);
+
+        if (resource == null) {
+            var msg = String.format("Can't read schema file from '%s'", schemaFile);
+            throw new ProducerGroupException(msg);
+        }
+
+        return new Schema.Parser().parse(new File(resource.getFile()));
+    }
+
     /**
-     * Prepare the producer by reaching out to Schema-Registry to obtain Schema, and regular Kafka
-     * producer boilerplate.
+     * Prepare the producer by reaching out to Schema-Registry to obtain Schema, or using
+     * RavineEmptyRecord in case of empty subject settings.
      *
      * @throws SchemaRegistryException when issues on Schema-Registry client;
      */
-    private void bootstrap() throws SchemaRegistryException {
+    private void bootstrap() throws SchemaRegistryException, IOException, ProducerGroupException {
         for (RouteConfig route : config.getRoutes()) {
             var routePath = route.getEndpoint().getPath();
             var subject = route.getSubject();
-            var spanName = String.format("name=\"%s\", subject=\"%s\", version=\"%d\"",
-                    route.getName(), subject.getName(), subject.getVersion());
+            Schema schema = null;
 
             log.info("Kafka producer named '{}' for '{}' route", route.getName(), routePath);
-            producers.put(routePath,
-                    new AvroProducer(tracer, spanName, config.getKafka(), route.getRequest()));
 
-            log.info("Registering schema for route...");
-            reqSchemas.put(routePath, schemaRegistry.getSubject(subject));
+            // when subject is empty, using a empty-record type of schema
+            if (subject == null) {
+                subject = new SubjectConfig();
+                subject.setName("RavineEmptyRecord");
+                schema = getEmptyRecordSchema();
+            } else {
+                schema = schemaRegistry.getSubject(subject);
+            }
+
+            var spanName = String.format("name=\"%s\", subject=\"%s\", version=\"%d\"",
+                    route.getName(), subject.getName(), subject.getVersion());
+            var producer = new AvroProducer(tracer, spanName, config.getKafka(),
+                    route.getRequest());
+
+            producers.put(routePath, producer);
+
+            log.info("Registering route using '{}' scheam, version '{}'",
+                    subject.getName(), subject.getVersion());
+            reqSchemas.put(routePath, schema);
         }
     }
 }

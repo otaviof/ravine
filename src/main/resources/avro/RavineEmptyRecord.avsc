@@ -1,0 +1,6 @@
+{
+  "type": "record",
+  "name": "RavineEmptyRecord",
+  "namespace": "io.github.otaviof.ravine.schema",
+  "fields": []
+}
