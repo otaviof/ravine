@@ -5,17 +5,17 @@ import static org.awaitility.Awaitility.await;
 import io.github.otaviof.ravine.config.Config;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {Config.class, EventListener.class})
 @Slf4j
 public class EventListenerTest implements ApplicationEventPublisherAware {
@@ -29,7 +29,7 @@ public class EventListenerTest implements ApplicationEventPublisherAware {
         this.publisher = publisher;
     }
 
-    @Before
+    @BeforeEach
     public void prepare() {
         publisher.publishEvent(new Event(this, "test", null));
     }
@@ -44,7 +44,7 @@ public class EventListenerTest implements ApplicationEventPublisherAware {
     public void getEvent() {
         var event = listener.getEvent("test");
 
-        Assert.assertNotNull(event);
-        Assert.assertEquals("test", event.getK());
+        Assertions.assertThat(event).isNotNull();
+        Assertions.assertThat("test").isEqualTo(event.getK());
     }
 }

@@ -1,15 +1,15 @@
 package io.github.otaviof.ravine.config;
 
 import java.util.Collections;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class ConfigTest {
+class ConfigTest {
     private Config config = new Config();
 
-    @Before
-    public void populate() {
+    @BeforeEach
+    void populate() {
         var routeConfig = new RouteConfig();
         var endpointConfig = new EndpointConfig();
 
@@ -21,10 +21,10 @@ public class ConfigTest {
     }
 
     @Test
-    public void getRouteByPath() {
+    void getRouteByPath() {
         var route = config.getRouteByPath("/test");
 
-        Assert.assertNotNull(route);
-        Assert.assertEquals("test", route.getName());
+        Assertions.assertThat(route).isNotNull();
+        Assertions.assertThat("test").isEqualTo(route.getName());
     }
 }

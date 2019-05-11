@@ -10,6 +10,8 @@ plugins {
 group = 'io.github.otaviof'
 sourceCompatibility = '11'
 
+ext['junit-jupiter.version'] = junitVersion
+
 repositories {
     mavenCentral()
     mavenLocal()
@@ -57,7 +59,17 @@ dependencies {
             "org.springframework.boot:spring-boot-starter-validation:${springVersion}")
 
     implementation('org.springframework.boot:spring-boot-starter')
-    testImplementation('org.springframework.boot:spring-boot-starter-test')
+
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'junit', module: 'junit'
+    }
+
+    compile("org.junit.jupiter:junit-jupiter-api")
+
+    testCompile("org.junit.jupiter:junit-jupiter-params")
+    testCompile("org.junit.platform:junit-platform-runner")
+
+    testRuntime("org.junit.jupiter:junit-jupiter-engine")
 }
 
 bootJar {
@@ -89,6 +101,7 @@ test {
 }
 
 tasks.withType(Test) {
+    useJUnitPlatform()
     testLogging {
         events 'started', 'passed'
     }

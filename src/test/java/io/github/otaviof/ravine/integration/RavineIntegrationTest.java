@@ -10,11 +10,11 @@ import io.opentracing.Tracer;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootContextLoader;
@@ -23,12 +23,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = Ravine.class)
 @ContextConfiguration(classes = IntegrationTestConfig.class, loader = SpringBootContextLoader.class)
 @ActiveProfiles("test")
@@ -49,18 +49,20 @@ public class RavineIntegrationTest {
     @Autowired
     Tracer tracer;
 
-    @BeforeClass
+    @BeforeAll
     public static void prepare() throws IOException, RestClientException {
         PrepareBackend.prepare();
     }
 
-    @Before
+    @BeforeEach
     public void usingDifferentTopics() {
         var routes = config.getRoutes().get(0);
-        Assert.assertNotEquals(routes.getRequest().getTopic(), routes.getResponse().getTopic());
+
+        Assertions.assertThat(routes.getRequest().getTopic())
+                .isNotEqualTo(routes.getResponse().getTopic());
     }
 
-    @Before
+    @BeforeEach
     public void prepareExternalActor() {
         var path = config.getRoutes().get(0).getEndpoint().getPath();
         var externalActor = new ExternalActor(tracer, publisher, config, path);
