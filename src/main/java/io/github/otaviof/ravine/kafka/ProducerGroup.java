@@ -99,6 +99,13 @@ public class ProducerGroup {
         }
     }
 
+    /**
+     * Load schema file containing empty-record definition.
+     *
+     * @return empty record schema;
+     * @throws IOException on issues to parse contents;
+     * @throws ProducerGroupException on not being able to read resource;
+     */
     private Schema getEmptyRecordSchema() throws IOException, ProducerGroupException {
         var classLoader = getClass().getClassLoader();
         var schemaFile = "avro/RavineEmptyRecord.avsc";

@@ -93,7 +93,8 @@ Configuration for Ravine is divided in the following sections: `startup`, `cache
 Startup is covering the application boot, taking care of how long to wait before expose the
 endpoints. In this configuration section you will find:
 
-- `ravine.startup.timeoutMs`: timeout in milliseconds on waiting for Kafka consumers to report ready;
+- `ravine.startup.timeoutMs`: timeout in milliseconds on waiting for Kafka consumers to report
+ready (`RUNNING`);
 - `ravine.startup.checkIntervalMs`: internal in milliseconds to check consumers status;
 
 ### `ravine.cache`
@@ -125,20 +126,21 @@ a simple identification tag used during tracing.
 Endpoint defines the HTTP settings covering this route entry. 
 
 - `ravine.routes[n].endpoint.path`: route path;
-- `ravine.routes[n].endpoint.methods`: HTTP methods accepted in this route, either `post` or `put`:
+- `ravine.routes[n].endpoint.methods`: HTTP methods accepted in this route, `get`, `post` or `put`;
 - `ravine.routes[n].endpoint.response.httpCode`: HTTP status code, by default `200`;
-- `ravine.routes[n].endpoint.response.contentType`: response content-type, by default `application/json`;
+- `ravine.routes[n].endpoint.response.contentType`: response content-type, by default using
+`application/json`;
 - `ravine.routes[n].endpoint.response.body`: payload to be displayed on a successful request;
 
-When you define `ravine.routes[n].response`, the actual payload `ravine.routes[n].endpoint.response.body`
-is not used, since the body of request will be filled by response message coming from Kafka. Regarding
-`ravine.routes[n].endpoint.response.httpCode`, this setting will only take place on a successful request,
-other error events are applicable here.
+When you define `ravine.routes[n].response`, the actual payload
+`ravine.routes[n].endpoint.response.body` is not used, since the body of request will be filled by
+response message coming from Kafka. Regarding `ravine.routes[n].endpoint.response.httpCode`, this
+setting will only take place on a successful request, other error events are applicable here.
 
 #### `ravine.routes[n].subject`
 
-Subject section refers to Schema-Registry, here you define the subject name and version that will be used
-to validate HTTP request, and produce a message in request Kafka topic.
+Subject section refers to Schema-Registry, here you define the subject name and version that will be
+used to validate HTTP request, and produce a message in request Kafka topic.
 
 - `ravine.routes[n].subject.name`: subject name;
 - `ravine.routes[n].subject.version`: subject version, by default `1`;
@@ -147,14 +149,15 @@ Subjects are loaded during Ravine boot.
 
 #### `ravine.routes[n].request`
 
-Request defines the Kafka settings to produce a message in the topic used to gather requests for this 
-specific route. Third party stream consumers would tap on this topic and react on its messages.
+Request defines the Kafka settings to produce a message in the topic used to gather requests for
+this specific route. Third party stream consumers would tap on this topic and react on its messages.
 
 - `ravine.routes[n].request.topic`: Kafka topic name;
 - `ravine.routes[n].request.valueSerde`: value serializer class, by default:
 `io.confluent.kafka.streams.serdes.avro.GenericAvroSerde`;
 - `ravine.routes[n].request.timeoutMs`: timeout in milliseconds to produce a message;
-- `ravine.routes[n].request.acks`: Kafka producer [`ack`][kafkaproducerdoc] approach, by default `all`;
+- `ravine.routes[n].request.acks`: Kafka producer [`ack`][kafkaproducerdoc] approach, by default
+using `all`;
 - `ravine.routes[n].request.properties`: kay-value pairs of properties to be informed in producer;
 
 #### `ravine.routes[n].response`
@@ -182,9 +185,9 @@ logback_events_total{level="warn",} 7.0
 
 ### Jaeger Tracing
 
-In order to trace requests throughout Ravine's runtime and Kafka, this project includes [OpenTracing][ot] 
-modules for [Spring Boot][otspringboot] and [Kafka Streams][otkafka], and therefore you can offload 
-tracing spans to Jaeger.
+In order to trace requests throughout Ravine's runtime and Kafka, this project includes
+[OpenTracing][ot] modules for [Spring Boot][otspringboot] and [Kafka Streams][otkafka], and
+therefore you can offload tracing spans to Jaeger.
 
 To enable tracing, make sure you set:
 
