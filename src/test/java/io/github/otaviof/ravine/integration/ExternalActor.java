@@ -9,6 +9,11 @@ import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 
+/**
+ * Pretends to be a external application interacting via Kafka with Ravine. It consume from all
+ * configured request topics, and produce the exact same payload on the respective response topic.
+ * Therefore, it acts as a third-party application interacting with Ravine.
+ */
 @Slf4j
 class ExternalActor {
     private final AvroConsumer consumer;
@@ -24,8 +29,8 @@ class ExternalActor {
         responseConfig.setGroupId(UUID.randomUUID().toString());
         responseConfig.setTimeoutMs(5000);
 
-        var producer = new AvroProducer(tracer, "integration-tests", config.getKafka(),
-                requestConfig);
+        var producer = new AvroProducer(
+                tracer, "integration-tests", config.getKafka(), requestConfig);
         var listener = new ExternalActorEventListener(producer);
         this.consumer = new AvroConsumer(tracer, publisher, config.getKafka(), responseConfig);
     }
@@ -34,6 +39,9 @@ class ExternalActor {
         return consumer.isRunning();
     }
 
+    /**
+     * Start the consumer threads.
+     */
     void bootstrap() {
         log.info("Starting test-actor consumer thread...");
         Thread consumerThread = new Thread(new AvroConsumerRunnable(this.consumer));

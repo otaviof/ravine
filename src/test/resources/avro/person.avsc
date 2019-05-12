@@ -1,7 +1,7 @@
 {
   "type": "record",
   "name": "Person",
-  "namespace": "io.github.otaviof.schema",
+  "namespace": "io.github.otaviof.ravine.schema",
   "fields": [
     {
       "name": "firstName",

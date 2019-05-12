@@ -30,18 +30,18 @@ public class EventListenerTest implements ApplicationEventPublisherAware {
     }
 
     @BeforeEach
-    public void prepare() {
+    void prepare() {
         publisher.publishEvent(new Event(this, "test", null));
     }
 
     @Test
-    public void inCache() {
+    void inCache() {
         await().atMost(200, TimeUnit.MILLISECONDS)
                 .until(() -> listener.inCache("test"));
     }
 
     @Test
-    public void getEvent() {
+    void getEvent() {
         var event = listener.getEvent("test");
 
         Assertions.assertThat(event).isNotNull();

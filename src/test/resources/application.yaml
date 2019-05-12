@@ -15,11 +15,29 @@ ravine:
     properties:
       retry.backoff.ms: 150
   routes:
+    - name: get-endpoint-example
+      endpoint:
+        path: /v1/group/app/action/get
+        methods:
+          - get
+        response:
+          httpCode: 200
+          contentType: application/json
+      request:
+        topic: kafka_request_topic
+        valueSerde: io.confluent.kafka.streams.serdes.avro.GenericAvroSerializer
+        timeoutMs: 2000
+      response:
+        topic: kafka_response_topic
+        timeoutMs: 5000
     - name: post-endpoint-example
       endpoint:
         path: /v1/group/app/action/post
         methods:
           - post
+        response:
+          httpCode: 200
+          contentType: application/json
       subject:
         name: person
       request:
