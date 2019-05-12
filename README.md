@@ -25,7 +25,7 @@ The project goal is empower developers to focus on event-driven eco-systems, and
 endpoints against existing Kafka based landscapes.
 
 <p align="center">
-    <a alt="Basic Ravie workflow" href="https://draw.io/?title=ravine-diag.png&url=https%3A%2F%2Fraw.githubusercontent.com%2Fotaviof%2Fravine%2Fspam%2Fassets%2Fdiagrams%2Fravine-diag.png">
+    <a alt="Basic Ravie workflow" href="https://draw.io/?title=ravine-diag.png&url=https%3A%2F%2Fraw.githubusercontent.com%2Fotaviof%2Fravine%2Fmaster%2Fassets%2Fdiagrams%2Fravine-diag.png">
         <img alt="Basic workflow" src="https://raw.githubusercontent.com/otaviof/ravine/master/assets/diagrams/ravine-diag.png"/>
     </a>
 </p>
@@ -46,7 +46,7 @@ back to Ravine.
 The following diagram represents the high level relationship between Ravine and Kafka topics.
 
 <p align="center">
-    <a alt="Ravine using Kafka topics workflow" href="https://draw.io/?title=ravine-topics-diag.png&url=https%3A%2F%2Fraw.githubusercontent.com%2Fotaviof%2Fravine%2Fspam%2Fassets%2Fdiagrams%2Fravine-topics-diag.png">
+    <a alt="Ravine using Kafka topics workflow" href="https://draw.io/?title=ravine-topics-diag.png&url=https%3A%2F%2Fraw.githubusercontent.com%2Fotaviof%2Fravine%2Fmaster%2Fassets%2Fdiagrams%2Fravine-topics-diag.png">
         <img alt="Ravine using Kafka topics workflow" src="https://raw.githubusercontent.com/otaviof/ravine/master/assets/diagrams/ravine-topics-diag.png"/>
     </a>
 </p>
