@@ -1,10 +1,14 @@
 package io.github.otaviof.ravine.integration;
 
 import io.github.otaviof.ravine.config.Config;
+import io.github.otaviof.ravine.config.KafkaRouteConfig;
+import io.github.otaviof.ravine.config.RouteConfig;
 import io.github.otaviof.ravine.kafka.AvroConsumer;
 import io.github.otaviof.ravine.kafka.AvroConsumerRunnable;
 import io.github.otaviof.ravine.kafka.AvroProducer;
 import io.opentracing.Tracer;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -16,35 +20,65 @@ import org.springframework.context.ApplicationEventPublisher;
  */
 @Slf4j
 class ExternalActor {
-    private final AvroConsumer consumer;
+    private final Map<AvroConsumer, Thread> consumerThreads;
 
-    ExternalActor(Tracer tracer, ApplicationEventPublisher publisher, Config config, String path) {
-        var requestConfig = config.getRouteByPath(path).getResponse();
-        requestConfig.setValueSerde("io.confluent.kafka.streams.serdes.avro.GenericAvroSerializer");
-        requestConfig.setGroupId(UUID.randomUUID().toString());
-        requestConfig.setTimeoutMs(3000);
+    ExternalActor(Tracer tracer, ApplicationEventPublisher publisher, Config config) {
+        this.consumerThreads = new HashMap<>();
 
-        var responseConfig = config.getRouteByPath(path).getRequest();
-        responseConfig.setValueSerde("io.confluent.kafka.streams.serdes.avro.GenericAvroSerde");
-        responseConfig.setGroupId(UUID.randomUUID().toString());
-        responseConfig.setTimeoutMs(5000);
+        for (RouteConfig routeConfig : config.getRoutes()) {
+            if (routeConfig.getResponse() != null) {
+                var producerConfig = prepareRequestKafkaRouteConfig(routeConfig);
+                var producer = new AvroProducer(tracer, "integration", config.getKafka(),
+                        producerConfig);
+                var subject = routeConfig.getSubject();
+                var listener = new ExternalActorEventListener(producer,
+                        subject == null ? "RavineEmptyRecord" : subject.getName());
+            }
 
-        var producer = new AvroProducer(
-                tracer, "integration-tests", config.getKafka(), requestConfig);
-        var listener = new ExternalActorEventListener(producer);
-        this.consumer = new AvroConsumer(tracer, publisher, config.getKafka(), responseConfig);
+            var consumerConfig = prepareResponseKafkaRouteConfig(routeConfig);
+            var consumer = new AvroConsumer(tracer, publisher, config.getKafka(), consumerConfig);
+            var thread = new Thread(new AvroConsumerRunnable(consumer));
+
+            this.consumerThreads.put(consumer, thread);
+        }
+    }
+
+    private KafkaRouteConfig prepareRequestKafkaRouteConfig(RouteConfig route) {
+        var cfg = route.getResponse();
+
+        cfg.setValueSerde("io.confluent.kafka.streams.serdes.avro.GenericAvroSerializer");
+        cfg.setGroupId(UUID.randomUUID().toString());
+        cfg.setTimeoutMs(3000);
+
+        return cfg;
+    }
+
+    private KafkaRouteConfig prepareResponseKafkaRouteConfig(RouteConfig route) {
+        var cfg = route.getRequest();
+
+        cfg.setValueSerde("io.confluent.kafka.streams.serdes.avro.GenericAvroSerde");
+        cfg.setGroupId(UUID.randomUUID().toString());
+        cfg.setTimeoutMs(5000);
+
+        return cfg;
     }
 
     boolean isConsumerReady() {
-        return consumer.isRunning();
+        for (Map.Entry<AvroConsumer, Thread> entry : consumerThreads.entrySet()) {
+            if (!entry.getKey().isRunning()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
      * Start the consumer threads.
      */
     void bootstrap() {
-        log.info("Starting test-actor consumer thread...");
-        Thread consumerThread = new Thread(new AvroConsumerRunnable(this.consumer));
-        consumerThread.start();
+        log.info("Starting test-actor consumer threads...");
+        for (Map.Entry<AvroConsumer, Thread> entry : consumerThreads.entrySet()) {
+            entry.getValue().start();
+        }
     }
 }

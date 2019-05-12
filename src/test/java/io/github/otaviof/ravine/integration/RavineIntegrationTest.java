@@ -74,9 +74,7 @@ class RavineIntegrationTest {
         }
 
         log.info("Instantiating external actor to simulate a third party application...");
-
-        var path = config.getRoutes().get(0).getEndpoint().getPath();
-        externalActor = new ExternalActor(tracer, publisher, config, path);
+        externalActor = new ExternalActor(tracer, publisher, config);
 
         externalActor.bootstrap();
         await().atMost(60, TimeUnit.SECONDS).until(externalActor::isConsumerReady);

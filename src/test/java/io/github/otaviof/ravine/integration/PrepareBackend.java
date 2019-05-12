@@ -17,10 +17,15 @@ public class PrepareBackend {
         var broker = "kafka.localtest.me:9092";
 
         log.info("Waiting for Kafka broker at '{}'", broker);
-        await().atMost(60, TimeUnit.SECONDS).until(() -> Utils.isPortOpen(broker));
+        await().atMost(60, TimeUnit.SECONDS)
+                .until(() -> Utils.isPortOpen(broker));
 
-        Utils.createKafkaTopics(broker,
-                Arrays.asList("kafka_request_topic", "kafka_response_topic", "kafka_dump_topic"));
+        Utils.createKafkaTopics(broker, Arrays.asList(
+                "kafka_get_request_topic",
+                "kafka_get_response_topic",
+                "kafka_request_topic",
+                "kafka_response_topic",
+                "kafka_dump_topic"));
     }
 
     /**
@@ -33,10 +38,11 @@ public class PrepareBackend {
         var schemaRegistryUrl = "schemaregistry.localtest.me:8681";
 
         log.info("Waiting for Schema-Registry at '{}'", schemaRegistryUrl);
-        await().atMost(60, TimeUnit.SECONDS).until(() -> Utils.isPortOpen(schemaRegistryUrl));
+        await().atMost(60, TimeUnit.SECONDS)
+                .until(() -> Utils.isPortOpen(schemaRegistryUrl));
 
-        Utils.registerSubject(String.format("http://%s", schemaRegistryUrl), "person",
-                "avro/person.avsc");
+        Utils.registerSubject(
+                String.format("http://%s", schemaRegistryUrl), "person", "avro/person.avsc");
     }
 
     /**

@@ -14,9 +14,11 @@ import org.springframework.context.ApplicationListener;
 @Slf4j
 class ExternalActorEventListener implements ApplicationListener<Event> {
     private final AvroProducer producer;
+    private final String schemaName;
 
-    ExternalActorEventListener(AvroProducer producer) {
+    ExternalActorEventListener(AvroProducer producer, String schemaName) {
         this.producer = producer;
+        this.schemaName = schemaName;
     }
 
     /**
@@ -27,12 +29,16 @@ class ExternalActorEventListener implements ApplicationListener<Event> {
     @Override
     public void onApplicationEvent(Event event) {
         try {
-            var schemaName = event.getV().getSchema().getName();
+            var schema = event.getV().getSchema().getName();
 
             log.info("[TEST] event received, type: '{}', key: '{}', value: '{}'",
-                    schemaName, event.getK(), event.getV());
+                    schema, event.getK(), event.getV());
 
-            this.producer.send(event.getK(), event.getV(), new HashMap<>());
+            if (schemaName.equals(schema)) {
+                this.producer.send(event.getK(), event.getV(), new HashMap<>());
+            } else {
+                log.info("[TEST] Skipping record!");
+            }
         } catch (AvroProducerException e) {
             e.printStackTrace();
         }
