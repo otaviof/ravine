@@ -24,12 +24,12 @@ ravine:
           httpCode: 200
           contentType: application/json
       request:
-        topic: kafka_request_topic
+        topic: kafka_get_request_topic
         valueSerde: io.confluent.kafka.streams.serdes.avro.GenericAvroSerializer
-        timeoutMs: 2000
-      response:
-        topic: kafka_response_topic
         timeoutMs: 5000
+      response:
+        topic: kafka_get_response_topic
+        timeoutMs: 10000
     - name: post-endpoint-example
       endpoint:
         path: /v1/group/app/action/post
@@ -43,10 +43,10 @@ ravine:
       request:
         topic: kafka_request_topic
         valueSerde: io.confluent.kafka.streams.serdes.avro.GenericAvroSerializer
-        timeoutMs: 2000
+        timeoutMs: 5000
       response:
         topic: kafka_response_topic
-        timeoutMs: 5000
+        timeoutMs: 10000
     - name: put-endpoint-example
       endpoint:
         path: /v1/group/app/action/put
@@ -61,5 +61,5 @@ ravine:
         name: person
       request:
         topic: kafka_dump_topic
-        timeoutMs: 2000
+        timeoutMs: 5000
         valueSerde: io.confluent.kafka.streams.serdes.avro.GenericAvroSerializer
