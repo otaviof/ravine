@@ -3,6 +3,7 @@
 *.ipr
 *.iws
 .classpath
+.data
 .env
 .gradle
 .idea

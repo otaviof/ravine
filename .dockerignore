@@ -4,6 +4,7 @@
 .DS_Store
 .ci*
 .classpath
+.data
 .env
 .git*
 .idea
@@ -13,4 +14,3 @@
 .vscode
 build/
 src/test
-

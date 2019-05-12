@@ -10,6 +10,9 @@ services:
       ZOOKEEPER_LOG4J_ROOT_LOGLEVEL: info
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - .data/zookeeper/data:/var/lib/zookeeper/data
+      - .data/zookeeper/logs:/var/lib/zookeeper/log
   kafka:
     image: confluentinc/cp-kafka:5.2.1-1
     ports:
@@ -26,6 +29,8 @@ services:
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAKFA_OPTS: -Djavax.net.debug=all
       KAFKA_LOG4J_ROOT_LOGLEVEL: info
+    volumes:
+      - .data/kafka/data:/var/lib/kafka/data
     depends_on:
       - zookeeper
   schemaregistry:
