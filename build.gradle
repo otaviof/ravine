@@ -3,7 +3,7 @@ plugins {
     id 'jacoco'
     id 'idea'
     id 'net.researchgate.release' version '2.6.0'
-    id 'org.springframework.boot' version '2.1.4.RELEASE'
+    id 'org.springframework.boot' version '2.1.5.RELEASE'
     id 'io.spring.dependency-management' version '1.0.7.RELEASE'
 }
 
@@ -28,35 +28,43 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
     testAnnotationProcessor("org.projectlombok:lombok:${lombokVersion}")
 
-    compile("org.apache.avro:avro:${avroVersion}")
-    compile("io.confluent:kafka-avro-serializer:${confluentVersion}")
-    compile("io.confluent:kafka-streams-avro-serde:${confluentVersion}")
+    compile(
+        "org.apache.avro:avro:${avroVersion}",
+        "io.confluent:kafka-avro-serializer:${confluentVersion}",
+        "io.confluent:kafka-streams-avro-serde:${confluentVersion}")
 
+    compile(
+        "org.apache.kafka:kafka-streams:${kafkaStreamsVersion}",
+        "org.apache.kafka:kafka-clients:${kafkaStreamsVersion}")
+    
     compile("com.github.ben-manes.caffeine:caffeine:${caffeineVersion}")
 
-    compile("org.apache.kafka:kafka-streams:${kafkaStreamsVersion}")
-    compile("org.apache.kafka:kafka-clients:${kafkaStreamsVersion}")
-
     compile("org.apache.commons:commons-lang3:${apacheCommonsVersion}")
+
     compile("org.awaitility:awaitility:${awaitilityVersion}")
 
-    compile("io.opentracing.contrib:opentracing-spring-cloud-starter:${otSpringStarterVersion}")
-    compile("io.opentracing.contrib:opentracing-spring-tracer-configuration-starter:${otSpringTracerConfigVersion}")
+    compile(
+        "io.opentracing.contrib:opentracing-spring-cloud-starter:${otSpringStarterVersion}",
+        "io.opentracing.contrib:opentracing-spring-tracer-configuration-starter:${otSpringTracerConfigVersion}")
     
-    compile("io.opentracing.contrib:opentracing-kafka-client:${otKafkaClientVersion}")
-    compile("io.opentracing.contrib:opentracing-kafka-streams:${otKafkaStreamsVersion}")
+    compile(
+        "io.opentracing.contrib:opentracing-kafka-client:${otKafkaVersion}",
+        "io.opentracing.contrib:opentracing-kafka-streams:${otKafkaVersion}")
 
-    compile("io.opentracing.contrib:opentracing-spring-jaeger-starter:${otSpringJaegerVersion}")
-    compile("io.jaegertracing:jaeger-core:${jaegerCoreVersion}")
+    compile(
+        "io.opentracing.contrib:opentracing-spring-jaeger-starter:${otSpringJaegerVersion}",
+        "io.jaegertracing:jaeger-core:${jaegerCoreVersion}")
 
-    compile("io.micrometer:micrometer-registry-prometheus:${micrometerVersion}")
-    compile("io.micrometer:micrometer-core:${micrometerVersion}")
+    compile(
+        "io.micrometer:micrometer-registry-prometheus:${micrometerVersion}",
+        "io.micrometer:micrometer-core:${micrometerVersion}")
 
-    compile("org.springframework.boot:spring-boot-starter-web:${springVersion}",
-            "org.springframework.boot:spring-boot-starter-logging:${springVersion}",
-            "org.springframework.boot:spring-boot-configuration-processor:${springVersion}",
-            "org.springframework.boot:spring-boot-starter-actuator:${springVersion}",
-            "org.springframework.boot:spring-boot-starter-validation:${springVersion}")
+    compile(
+        "org.springframework.boot:spring-boot-starter-web:${springVersion}",
+        "org.springframework.boot:spring-boot-starter-logging:${springVersion}",
+        "org.springframework.boot:spring-boot-configuration-processor:${springVersion}",
+        "org.springframework.boot:spring-boot-starter-actuator:${springVersion}",
+        "org.springframework.boot:spring-boot-starter-validation:${springVersion}")
 
     implementation('org.springframework.boot:spring-boot-starter')
 
