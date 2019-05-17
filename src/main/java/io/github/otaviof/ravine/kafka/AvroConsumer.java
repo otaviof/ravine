@@ -96,7 +96,7 @@ public class AvroConsumer extends AbstractHealthIndicator {
 
         log.info("Starting Kafka stream consumer processor on topic '{}'...", topic);
         topology.addSource("SOURCE", topic)
-                .addProcessor("RavineStreamProcessor", () -> new StreamProcessor(publisher),
+                .addProcessor("RavineStreamProcessor", () -> new StreamProcessor(tracer, publisher),
                         "SOURCE");
 
         streams = new KafkaStreams(topology, consumerProperties(), supplier);
