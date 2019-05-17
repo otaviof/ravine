@@ -1,7 +1,7 @@
 ---
 logging:
   level:
-    io.github.otaviof.ravine: TRACE
+    io.github.otaviof: TRACE
 ravine:
   startup:
     timeoutMs: 60000

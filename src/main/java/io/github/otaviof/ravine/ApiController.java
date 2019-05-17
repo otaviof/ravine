@@ -32,8 +32,20 @@ public class ApiController {
         this.router = router;
     }
 
+    /**
+     * Handle GET based requests, does not expect a body.
+     *
+     * @param req servlet request instance;
+     * @param res servlet response instance;
+     * @return String based response payload;
+     * @throws RouterRouteNotFoundException on not being able to route based on path;
+     * @throws RouterRouteMethodNotAllowedException http request method is not configured on path;
+     * @throws AvroProducerException error on producing a message;
+     * @throws RouterRouteTimeoutException timeout on waiting for response;
+     * @throws ProducerGroupAvroConversionException on converting payload to Avro;
+     */
     @GetMapping
-    public String emptyBodyHandler(HttpServletRequest req, HttpServletResponse res) throws
+    public String handler(HttpServletRequest req, HttpServletResponse res) throws
             RouterRouteNotFoundException,
             RouterRouteTimeoutException,
             AvroProducerException,
@@ -81,13 +93,26 @@ public class ApiController {
         return routeRequest(request, res);
     }
 
-    private String routeRequest(Request request, HttpServletResponse res) throws
+    /**
+     * Execute the routing for a given request, organizing outcomes in a way that Spring Boot can
+     * display the results to the user.
+     *
+     * @param req servlet request instance;
+     * @param res servlet response instance;
+     * @throws RouterRouteNotFoundException on not being able to route based on path;
+     * @throws RouterRouteMethodNotAllowedException http request method is not configured on path;
+     * @throws AvroProducerException error on producing a message;
+     * @throws RouterRouteTimeoutException timeout on waiting for response;
+     * @throws ProducerGroupAvroConversionException on converting payload to Avro;
+     */
+    private String routeRequest(Request req, HttpServletResponse res) throws
             RouterRouteNotFoundException,
             RouterRouteTimeoutException,
             AvroProducerException,
             ProducerGroupAvroConversionException,
             RouterRouteMethodNotAllowedException {
-        var routingResult = router.route(request);
+        var routingResult = router.route(req);
+
         res.setStatus(routingResult.getStatusCode());
         res.setContentType(routingResult.getContentType());
 

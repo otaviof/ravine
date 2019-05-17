@@ -4,7 +4,6 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.http.entity.ContentType;
 
 @Getter
 @Setter
@@ -13,7 +12,7 @@ public class ResponseConfig {
     @Max(599)
     private int httpCode = 200;
 
-    private String contentType = ContentType.APPLICATION_JSON.toString();
+    private String contentType = "application/json";
 
     private String body = "";
 }
